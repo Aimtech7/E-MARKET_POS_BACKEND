@@ -9,6 +9,9 @@ const cartRoute = require("./routes/cart-route");
 const invoiceRoute = require("./routes/invoice-route");
 const transactionRoute = require("./routes/transaction-route");
 const auditLogger = require("./middleware/audit-logger");
+const supplierRoute = require("./routes/supplier-route");
+const poRoute = require("./routes/po-route");
+const inventoryRoute = require("./routes/inventory-route");
 
 
 
@@ -42,6 +45,9 @@ app.use("/user", userRoute);
 app.use("/cart", cartRoute);
 app.use("/invoice", invoiceRoute);
 app.use("/transaction", transactionRoute);
+app.use("/supplier", supplierRoute);
+app.use("/po", poRoute);
+app.use("/inventory", inventoryRoute);
 
 
 app.get("/", async (req, res) => {

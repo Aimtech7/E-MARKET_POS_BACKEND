@@ -3,6 +3,7 @@ const Refund = require("../model/Refund");
 const Invoice = require("../model/Invoice");
 const Product = require("../model/Product");
 const Cart = require("../model/Cart");
+const InventoryMovement = require("../model/InventoryMovement");
 
 const getTransactions = async (req, res) => {
   const { cashier, paymentMethod, type, startDate, endDate, sort = "-timestamp" } = req.query;
@@ -121,6 +122,21 @@ const refundTransaction = async (req, res) => {
     });
 
     await transaction.save();
+
+    // Restore stock levels and log inventory movements
+    for (let rItem of itemsToSave) {
+      const prod = await Product.findById(rItem.product);
+      prod.stockQuantity += rItem.qty;
+      await prod.save();
+
+      const movement = new InventoryMovement({
+        product: rItem.product,
+        qty: rItem.qty,
+        type: "refund",
+        reason: `Returned products. Refund Receipt #${refundNumber}`,
+      });
+      await movement.save();
+    }
 
     return res.status(201).json({
       message: "Refund processed successfully",

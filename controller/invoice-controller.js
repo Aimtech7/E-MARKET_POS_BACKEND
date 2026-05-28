@@ -1,6 +1,8 @@
 const Invoice = require("../model/Invoice");
 const Cart = require("../model/Cart");
 const Transaction = require("../model/Transaction");
+const Product = require("../model/Product");
+const InventoryMovement = require("../model/InventoryMovement");
 const path = require("path");
 const fs = require("fs");
 const { generateInvoicePDF } = require("../services/pdf-service");
@@ -30,6 +32,15 @@ const createInvoice = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
+    // Verify stock availability and prevent overselling
+    for (let item of cart.products) {
+      if (item.product.stockQuantity < item.qty) {
+        return res.status(400).json({
+          message: `Insufficient stock for ${item.product.productName}. Available: ${item.product.stockQuantity}, Requested: ${item.qty}`,
+        });
+      }
+    }
+
     const invoiceNumber = await generateInvoiceNumber();
     const invoice = new Invoice({
       invoiceNumber,
@@ -57,6 +68,21 @@ const createInvoice = async (req, res) => {
       type: "sale",
     });
     await transaction.save();
+
+    // Deduct stock levels and save movement logs
+    for (let item of cart.products) {
+      const prod = await Product.findById(item.product._id);
+      prod.stockQuantity -= item.qty;
+      await prod.save();
+
+      const movement = new InventoryMovement({
+        product: item.product._id,
+        qty: -item.qty,
+        type: "sale",
+        reason: `Supermarket checkout sale. Invoice #${invoiceNumber}`,
+      });
+      await movement.save();
+    }
 
     // Generate PDF invoice
     const pdfFilename = `${invoiceNumber}.pdf`;

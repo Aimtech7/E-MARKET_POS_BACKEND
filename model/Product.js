@@ -16,6 +16,11 @@ const Product = Schema({
   },
   productImage: { type: String, required:true },
   productPrice: { type: Number, required: true },
+  stockQuantity: { type: Number, default: 0 },
+  reorderLevel: { type: Number, default: 5 },
+  expiryDate: { type: Date },
+  batchNumber: { type: String },
+  supplierReference: { type: Schema.Types.ObjectId, ref: "Supplier" },
 });
 
 module.exports = mongoose.model("Product", Product);

@@ -20,7 +20,7 @@ const getAllProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  const { productName, productCategory, unitOfMeasure, productPrice } =
+  const { productName, productCategory, unitOfMeasure, productPrice, sku, barcode, reorderLevel } =
     req.body;
   const { id } = req.params;
   const image = req.file;
@@ -36,6 +36,9 @@ const updateProduct = async (req, res) => {
           productCategory: cate,
           unitOfMeasure:unit,
           productPrice,
+          sku: sku || undefined,
+          barcode: barcode || undefined,
+          reorderLevel: parseInt(reorderLevel) || 5,
           productImage: image.path,
         },
         { returnOriginal: true }
@@ -51,6 +54,9 @@ const updateProduct = async (req, res) => {
           productCategory:cate,
           unitOfMeasure:unit,
           productPrice,
+          sku: sku || undefined,
+          barcode: barcode || undefined,
+          reorderLevel: parseInt(reorderLevel) || 5,
         },
         {
           returnOriginal: true,

@@ -1,0 +1,16 @@
+const mongoose = require("mongoose");
+
+const Schema = mongoose.Schema;
+
+const InvoiceSchema = new Schema({
+  invoiceNumber: { type: String, required: true, unique: true },
+  cart: { type: Schema.Types.ObjectId, ref: "Cart", required: true },
+  cashier: { type: String, required: true },
+  amountPaid: { type: Number, required: true },
+  changeGiven: { type: Number, required: true },
+  paymentMethod: { type: String, default: "Cash" },
+  timestamp: { type: Date, default: Date.now },
+  pdfPath: { type: String }
+});
+
+module.exports = mongoose.model("Invoice", InvoiceSchema);

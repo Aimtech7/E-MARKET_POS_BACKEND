@@ -6,6 +6,7 @@ const unitOfMeasureRoute = require("./routes/unitOfmeasure-route");
 const productRoute = require("./routes/product-route");
 const userRoute = require("./routes/user-route");
 const cartRoute = require("./routes/cart-route");
+const invoiceRoute = require("./routes/invoice-route");
 
 
 
@@ -36,6 +37,7 @@ app.use("/unit", unitOfMeasureRoute);
 app.use("/product", productRoute);
 app.use("/user", userRoute);
 app.use("/cart", cartRoute);
+app.use("/invoice", invoiceRoute);
 
 
 app.get("/", async (req, res) => {

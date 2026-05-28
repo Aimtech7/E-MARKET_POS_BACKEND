@@ -28,20 +28,22 @@ graph TD
 - **Styling**: Vanilla CSS Modules with a custom dynamic theme provider (supporting Dark, White, Material, and Green themes).
 - **Icons**: FontAwesome SVG Core.
 - **Development & Testing**: Storybook for UI component isolation and testing.
+- **Key Installed Packages**: `react-to-print`, `jspdf`.
 
 ### Backend (`POS-Backend-main`)
-- **Runtime Environment**: Node.js.
-- **Web Framework**: Express.js.
-- **Database**: MongoDB with Mongoose ODM.
+- **Runtime Environment**: Node.js
+- **Web Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Tokens) & `bcryptjs` for password hashing.
 - **Media Uploads**: Multer middleware for storing product images.
 - **Process Manager**: Nodemon for local hot-reloading development.
+- **Key Installed Packages**: `pdfkit`, `uuid`.
 
 ---
 
 ## 3. Database Schema
 
-The backend defines five main Mongoose models:
+The backend defines seven main Mongoose models:
 
 | Model | Fields | References / Types |
 |---|---|---|
@@ -50,6 +52,9 @@ The backend defines five main Mongoose models:
 | **`Cart`** | `description` (String), `tax` (Number), `discount` (Number), `products` (Array of items) | `Product`, `qty` (Number) |
 | **`Category`** | `categoryName` (Unique string) | - |
 | **`UnitOfMeasure`** | `unitOfMeasureName` (Unique string), `baseUnitOfMeasure` (String), `conversionFactor` (Number) | - |
+| **`Invoice`** | `invoiceNumber` (Unique string), `cart` (ObjectId), `cashier` (String), `amountPaid` (Number), `changeGiven` (Number), `paymentMethod` (String), `timestamp` (Date), `pdfPath` (String) | `Cart` |
+| **`Transaction`** | `transactionNumber` (Unique string), `invoice` (ObjectId), `cashier` (String), `paymentMethod` (String), `totalAmount` (Number), `type` (String enum: "sale"/"refund"/"void"), `timestamp` (Date) | `Invoice` |
+| **`Refund`** | `refundNumber` (Unique string), `originalInvoice` (ObjectId), `refundedItems` (Array of refunded products, quantities, and price), `totalRefundedAmount` (Number), `reason` (String), `cashier` (String), `timestamp` (Date) | `Invoice`, `Product` |
 
 ---
 
@@ -60,6 +65,16 @@ The backend defines five main Mongoose models:
 - **Calculations**: Accurate real-time calculation of order totals, custom discounts, and taxes.
 - **Product Filter & Search**: Cashiers can browse products by category, unit of measure, or search by name.
 - **Display Modes**: Toggleable layout structures between grid/card views and detailed lists.
+- **Thermal Invoice Printing**: Formatted printable thermal receipts (80mm) showing items, subtotals, tax/discount details, cashier logs, and change calculations. Supports direct physical printing or custom PDF downloads.
+- **Reprint Last Receipt**: Easy click feature to instantly reprint the receipt for the last completed checkout transaction.
+
+### Sales History & Analytics
+- **Dashboard & Logs**: Detailed list page displaying completed sales transactions and partial/full refunds.
+- **Aggregations & Analytics**: Visual summary counters for Net Sales, Gross Sales, and Total Money Refunded.
+- **Granular Search Filters**: Allows filtering transaction logs by Cashier name, Payment Method (Cash, Card, Mobile, Credit), Date range, and transaction types.
+- **Refund Processing System**: Cashiers can selectively adjust item return quantities to process full or partial transaction refunds, automatically creating matching "refund" logs and calculating proportional tax/discount offsets.
+- **CSV Data Exporting**: Support for exporting matching transaction logs to downloadable spreadsheet-friendly CSV files.
+- **Mutation Audit Logs**: Express security middleware capturing every mutation endpoint payload (POST, PUT, DELETE, PATCH) into a logged `logs/audit.log` file on the server.
 
 ### Inventory & Resource Management
 - **Products**: CRUD capability for adding new items, configuring pricing, referencing specific units of measure, categories, and uploading images.

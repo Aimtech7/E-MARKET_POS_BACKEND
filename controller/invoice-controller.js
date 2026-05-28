@@ -1,5 +1,6 @@
 const Invoice = require("../model/Invoice");
 const Cart = require("../model/Cart");
+const Transaction = require("../model/Transaction");
 const path = require("path");
 const fs = require("fs");
 const { generateInvoicePDF } = require("../services/pdf-service");
@@ -40,6 +41,22 @@ const createInvoice = async (req, res) => {
     });
 
     await invoice.save();
+
+    // Create matching Transaction log
+    const subtotal = cart.products.reduce((acc, p) => acc + p.qty * p.product.productPrice, 0);
+    const discountAmount = subtotal * cart.discount;
+    const taxAmount = (subtotal - discountAmount) * cart.tax;
+    const totalAmount = subtotal - discountAmount + taxAmount;
+
+    const transaction = new Transaction({
+      transactionNumber: invoiceNumber.replace("INV-", "TXN-"),
+      invoice: invoice._id,
+      cashier: cashierName,
+      paymentMethod: paymentMethod || "Cash",
+      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      type: "sale",
+    });
+    await transaction.save();
 
     // Generate PDF invoice
     const pdfFilename = `${invoiceNumber}.pdf`;

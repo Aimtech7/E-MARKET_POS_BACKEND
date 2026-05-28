@@ -36,14 +36,14 @@ const checkCart = async (req, res) => {
       discount,
       products: prods
     });
-    cart.save();
+    await cart.save();
   } catch (err) {
     return res.status(404).json({ message: "Error on fetching carts" });
   }
   if (cart) {
     return res
       .status(201)
-      .json({ message: "Cart have been added into database" });
+      .json({ message: "Cart have been added into database", cart });
   }
   return res.status(401).json({ message: "No carts Found" });
 };

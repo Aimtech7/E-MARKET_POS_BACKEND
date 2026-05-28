@@ -7,6 +7,8 @@ const productRoute = require("./routes/product-route");
 const userRoute = require("./routes/user-route");
 const cartRoute = require("./routes/cart-route");
 const invoiceRoute = require("./routes/invoice-route");
+const transactionRoute = require("./routes/transaction-route");
+const auditLogger = require("./middleware/audit-logger");
 
 
 
@@ -28,6 +30,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+app.use(auditLogger);
 app.use('/uploads', express.static('uploads'));
 
 
@@ -38,6 +41,7 @@ app.use("/product", productRoute);
 app.use("/user", userRoute);
 app.use("/cart", cartRoute);
 app.use("/invoice", invoiceRoute);
+app.use("/transaction", transactionRoute);
 
 
 app.get("/", async (req, res) => {

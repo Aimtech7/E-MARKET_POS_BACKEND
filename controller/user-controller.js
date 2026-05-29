@@ -3,9 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 const getUsers = async (req, res) => {
-  let users;
   try {
-    users = await User.find();
+    users = await User.find().select("-password");
   } catch (err) {
     return res
       .status(402)
@@ -59,7 +58,7 @@ const login = async (req, res, next) => {
   }
   let token;
   try {
-    token = jwt.sign({ username: user.username }, "app_token", {
+    token = jwt.sign({ username: user.username, admin: user.admin }, "app_token", {
       expiresIn: "2h",
     });
   } catch (err) {

@@ -9,8 +9,10 @@ module.exports = (req, res, next) => {
       throw new Error("authorization failed");
     }
     const decodedToken = jwt.verify(token, "app_token");
-    console.log(decodedToken.username);
-    req.userData = { username: decodedToken.username };
+    req.userData = { 
+      username: decodedToken.username, 
+      admin: decodedToken.admin 
+    };
     next();
   } catch (err) {
     return next("authorization failed");

@@ -71,7 +71,9 @@ const createReceipt = async (req, res) => {
     const relativePdfPath = path.join("uploads", "receipts", pdfFilename);
     const absolutePdfPath = path.join(__dirname, "..", relativePdfPath);
 
-    await generateReceiptPDF(receipt, absolutePdfPath);
+    const StoreSettings = require("../model/StoreSettings");
+    let settings = await StoreSettings.findOne();
+    await generateReceiptPDF(receipt, absolutePdfPath, settings);
 
     receipt.pdfPath = `/uploads/receipts/${pdfFilename}`;
     await receipt.save();

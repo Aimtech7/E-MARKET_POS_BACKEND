@@ -2,7 +2,7 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 
-const generateInvoicePDF = (invoice, cart, filePath) => {
+const generateInvoicePDF = (invoice, cart, filePath, settings) => {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ size: "A6", margin: 15 });
@@ -17,13 +17,17 @@ const generateInvoicePDF = (invoice, cart, filePath) => {
       doc.pipe(stream);
 
       // Store Header / Branding
+      const shopName = settings?.shopName || "EMMARKET SUPERMARKET";
+      const shopAddress = settings?.address || "123 Market Street, Cityville";
+      const shopPhone = settings?.phone || "+123-456-7890";
+
       doc
         .fillColor("#111111")
         .fontSize(16)
-        .text("EMMARKET SUPERMARKET", { align: "center" })
+        .text(shopName, { align: "center" })
         .fontSize(8)
-        .text("123 Market Street, Cityville", { align: "center" })
-        .text("Tel: +123-456-7890", { align: "center" })
+        .text(shopAddress, { align: "center" })
+        .text(`Tel: ${shopPhone}`, { align: "center" })
         .moveDown(1);
 
       // Transaction Info
@@ -85,9 +89,10 @@ const generateInvoicePDF = (invoice, cart, filePath) => {
         .moveDown(1.5);
 
       // Footer
+      const footerMsg = settings?.receiptFooter || "Thank you for shopping with us!";
       doc
         .fontSize(8)
-        .text("Thank you for shopping with us!", { align: "center" })
+        .text(footerMsg, { align: "center" })
         .text("Please retain this receipt as proof of purchase.", { align: "center" });
 
       doc.end();

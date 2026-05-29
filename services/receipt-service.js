@@ -2,7 +2,7 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 
-const generateReceiptPDF = (receipt, filePath) => {
+const generateReceiptPDF = (receipt, filePath, settings) => {
   return new Promise((resolve, reject) => {
     try {
       // 80mm thermal paper receipt dimensions (approx width 226 points)
@@ -21,14 +21,18 @@ const generateReceiptPDF = (receipt, filePath) => {
       doc.pipe(stream);
 
       // Store Header
+      const shopName = settings?.shopName || "EMMARKET SUPERMARKET";
+      const shopAddress = settings?.address || "123 Market Street, Cityville";
+      const shopPhone = settings?.phone || "+123-456-7890";
+      
       doc
         .fontSize(14)
         .font('Helvetica-Bold')
-        .text("EMMARKET SUPERMARKET", { align: "center" })
+        .text(shopName, { align: "center" })
         .fontSize(8)
         .font('Helvetica')
-        .text("123 Market Street, Cityville", { align: "center" })
-        .text("Tel: +123-456-7890", { align: "center" })
+        .text(shopAddress, { align: "center" })
+        .text(`Tel: ${shopPhone}`, { align: "center" })
         .moveDown(1);
 
       // Receipt Info
@@ -91,7 +95,8 @@ const generateReceiptPDF = (receipt, filePath) => {
          .moveDown(1.5);
 
       // Footer
-      doc.text("Thank you for shopping with us!", { align: "center" })
+      const footerMsg = settings?.receiptFooter || "Thank you for shopping with us!";
+      doc.text(footerMsg, { align: "center" })
          .text("Please retain this receipt.", { align: "center" });
 
       doc.end();

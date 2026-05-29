@@ -89,7 +89,9 @@ const createInvoice = async (req, res) => {
     const relativePdfPath = path.join("uploads", "invoices", pdfFilename);
     const absolutePdfPath = path.join(__dirname, "..", relativePdfPath);
 
-    await generateInvoicePDF(invoice, cart, absolutePdfPath);
+    const StoreSettings = require("../model/StoreSettings");
+    let settings = await StoreSettings.findOne();
+    await generateInvoicePDF(invoice, cart, absolutePdfPath, settings);
 
     invoice.pdfPath = `/uploads/invoices/${pdfFilename}`;
     await invoice.save();

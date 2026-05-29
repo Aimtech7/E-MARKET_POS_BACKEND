@@ -14,6 +14,8 @@ const poRoute = require("./routes/po-route");
 const inventoryRoute = require("./routes/inventory-route");
 const receiptRoute = require("./routes/receipt-route");
 const analyticsRoute = require("./routes/analytics-route");
+const reportRoute = require("./routes/report-route");
+const settingsRoute = require("./routes/settings-route");
 
 let dotenv = require("dotenv").config();
 
@@ -36,9 +38,6 @@ app.use(auditLogger);
 app.use('/uploads', express.static('uploads'));
 
 
-
-const reportRoute = require("./routes/report-route");
-
 app.use("/category", categoryRoute);
 app.use("/unit", unitOfMeasureRoute);
 app.use("/product", productRoute);
@@ -52,6 +51,7 @@ app.use("/inventory", inventoryRoute);
 app.use("/receipt", receiptRoute);
 app.use("/analytics", analyticsRoute);
 app.use("/reports", reportRoute);
+app.use("/settings", settingsRoute);
 
 
 app.get("/", async (req, res) => {

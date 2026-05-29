@@ -5,9 +5,11 @@ const fs = require("fs");
 const bwipjs = require("bwip-js");
 
 const getAllProduct = async (req, res) => {
+  const includeArchived = req.query.includeArchived === 'true';
   let product;
   try {
-    product = await Product.find().populate([
+    const filter = includeArchived ? {} : { isArchived: { $ne: true } };
+    product = await Product.find(filter).populate([
       "productCategory",
       "unitOfMeasure",
     ]);
@@ -15,12 +17,12 @@ const getAllProduct = async (req, res) => {
     return res.status(404).json({ message: "No data found" });
   }
   return res
-    .status(201)
+    .status(200)
     .json(product.map((p) => p.toObject({ getters: true })));
 };
 
 const updateProduct = async (req, res) => {
-  const { productName, productCategory, unitOfMeasure, productPrice, sku, barcode, reorderLevel } =
+  const { productName, productCategory, unitOfMeasure, productPrice, costPrice, sellingPrice, profitMargin, sku, barcode, reorderLevel } =
     req.body;
   const { id } = req.params;
   const image = req.file;
@@ -28,40 +30,32 @@ const updateProduct = async (req, res) => {
   let unit = await UnitOfMeasure.findOne({unitOfMeasureName:unitOfMeasure})
   let cate = await Category.findOne({categoryName:productCategory})
   try {
+    const updateData = {
+      productName,
+      productCategory: cate,
+      unitOfMeasure: unit,
+      productPrice,
+      costPrice: costPrice || 0,
+      sellingPrice: sellingPrice || 0,
+      profitMargin: profitMargin || 0,
+      sku: sku || undefined,
+      barcode: barcode || undefined,
+      reorderLevel: parseInt(reorderLevel) || 5,
+    };
     if (image) {
-      product = await Product.findByIdAndUpdate(
-        id,
-        {
-          productName,
-          productCategory: cate,
-          unitOfMeasure:unit,
-          productPrice,
-          sku: sku || undefined,
-          barcode: barcode || undefined,
-          reorderLevel: parseInt(reorderLevel) || 5,
-          productImage: image.path,
-        },
-        { returnOriginal: true }
-      );
+      updateData.productImage = image.path;
+    }
+
+    product = await Product.findByIdAndUpdate(
+      id,
+      updateData,
+      { returnOriginal: true }
+    );
+    if (image && product && product.productImage) {
       try {
         fs.unlinkSync(product.productImage);
       } catch (err) {}
-    } else
-      product = await Product.findByIdAndUpdate(
-        id,
-        {
-          productName,
-          productCategory:cate,
-          unitOfMeasure:unit,
-          productPrice,
-          sku: sku || undefined,
-          barcode: barcode || undefined,
-          reorderLevel: parseInt(reorderLevel) || 5,
-        },
-        {
-          returnOriginal: true,
-        }
-      );
+    }
   } catch (err) {
     if (image) fs.unlinkSync(image.path);
     console.log(err);
@@ -97,6 +91,9 @@ const createProduct = async (req, res) => {
     productCategory,
     unitOfMeasure,
     productPrice,
+    costPrice,
+    sellingPrice,
+    profitMargin,
     stockQuantity,
     reorderLevel,
     expiryDate,
@@ -155,6 +152,9 @@ const createProduct = async (req, res) => {
           unitOfMeasureName: unitOfMeasure,
         }),
         productPrice: parseFloat(productPrice),
+        costPrice: parseFloat(costPrice) || 0,
+        sellingPrice: parseFloat(sellingPrice) || 0,
+        profitMargin: parseFloat(profitMargin) || 0,
         productImage: imagePath.path,
         stockQuantity: parseInt(stockQuantity) || 0,
         reorderLevel: parseInt(reorderLevel) || 5,
@@ -220,9 +220,37 @@ const getProductBarcodeImage = async (req, res) => {
   }
 };
 
+const archiveProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findByIdAndUpdate(id, { isArchived: true }, { new: true });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    return res.status(200).json({ message: "Product archived successfully", product });
+  } catch (err) {
+    return res.status(500).json({ message: "Could not archive product", error: err.message });
+  }
+};
+
+const restoreProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findByIdAndUpdate(id, { isArchived: false }, { new: true });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    return res.status(200).json({ message: "Product restored successfully", product });
+  } catch (err) {
+    return res.status(500).json({ message: "Could not restore product", error: err.message });
+  }
+};
+
 exports.getAllProduct = getAllProduct;
 exports.deleteProduct = deleteProduct;
 exports.updateProduct = updateProduct;
 exports.createProduct = createProduct;
 exports.clearAll = clearAll;
 exports.getProductBarcodeImage = getProductBarcodeImage;
+exports.archiveProduct = archiveProduct;
+exports.restoreProduct = restoreProduct;

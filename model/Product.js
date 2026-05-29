@@ -26,7 +26,7 @@ const Product = Schema({
   batchNumber: { type: String },
   supplierReference: { type: Schema.Types.ObjectId, ref: "Supplier" },
   sku: { type: String, unique: true, sparse: true },
-  barcode: { type: String }
+  isArchived: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model("Product", Product);

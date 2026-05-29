@@ -37,6 +37,8 @@ app.use('/uploads', express.static('uploads'));
 
 
 
+const reportRoute = require("./routes/report-route");
+
 app.use("/category", categoryRoute);
 app.use("/unit", unitOfMeasureRoute);
 app.use("/product", productRoute);
@@ -49,6 +51,7 @@ app.use("/po", poRoute);
 app.use("/inventory", inventoryRoute);
 app.use("/receipt", receiptRoute);
 app.use("/analytics", analyticsRoute);
+app.use("/reports", reportRoute);
 
 
 app.get("/", async (req, res) => {

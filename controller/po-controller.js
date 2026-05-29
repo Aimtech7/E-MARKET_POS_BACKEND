@@ -62,9 +62,12 @@ const updatePOStatus = async (req, res) => {
 
           const movement = new InventoryMovement({
             product: item.product,
-            qty: item.qty,
-            type: "restock",
+            quantity: item.qty,
+            qty: item.qty, // legacy
+            action: "restock",
+            type: "restock", // legacy
             reason: `Restocked via Purchase Order #${po.poNumber}`,
+            userId: req.userData.userId
           });
           await movement.save();
         }

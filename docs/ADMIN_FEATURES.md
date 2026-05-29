@@ -17,3 +17,8 @@
 - Added Supplier Management with full CRUD capabilities.
 - Allows setting Supplier Name, Contact, Email, Phone, and Address.
 
+## Purchase Order Management
+- Create Purchase Orders with multiple items.
+- Track PO status (Draft, Ordered, Received, Cancelled).
+- Automatically update inventory stock upon receiving PO items.
+

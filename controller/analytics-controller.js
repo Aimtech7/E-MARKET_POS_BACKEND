@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Receipt = require("../model/Receipt");
 const Product = require("../model/Product");
-const Inventory = require("../model/Inventory");
+const Inventory = require("../model/InventoryMovement");
 
 // Helper to get start and end of a given date
 const getDayBounds = (date) => {

@@ -1,7 +1,7 @@
 const Refund = require("../model/Refund");
 const Invoice = require("../model/Invoice");
 const Product = require("../model/Product");
-const Inventory = require("../model/Inventory");
+const Inventory = require("../model/InventoryMovement");
 
 const processRefund = async (req, res) => {
   const { originalInvoiceId, itemsToRefund, reason } = req.body;

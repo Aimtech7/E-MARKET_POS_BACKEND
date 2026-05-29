@@ -39,8 +39,25 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 app.use(auditLogger);
-app.use('/uploads', express.static('uploads'));
+let gfsBucket;
+mongoose.connection.once("open", () => {
+  gfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: "uploads"
+  });
+});
 
+app.get('/uploads/:filename', async (req, res) => {
+  try {
+    if (!gfsBucket) return res.status(500).json({ message: "GridFS not initialized" });
+    const file = await gfsBucket.find({ filename: req.params.filename }).toArray();
+    if (!file || file.length === 0) {
+      return res.status(404).json({ message: "File not found" });
+    }
+    gfsBucket.openDownloadStreamByName(req.params.filename).pipe(res);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 app.use("/category", categoryRoute);
 app.use("/unit", unitOfMeasureRoute);

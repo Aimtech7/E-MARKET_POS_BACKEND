@@ -97,8 +97,35 @@ const getProfitCSV = async (req, res) => {
   }
 };
 
+const getSalesChartData = async (req, res) => {
+  try {
+    // Get last 7 days of sales grouped by date
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const receipts = await Receipt.find({ timestamp: { $gte: sevenDaysAgo } });
+
+    const groupedData = receipts.reduce((acc, curr) => {
+      const date = curr.timestamp ? curr.timestamp.toISOString().split("T")[0] : "-";
+      if (!acc[date]) {
+        acc[date] = { date, revenue: 0, profit: 0 };
+      }
+      acc[date].revenue += curr.grandTotal || 0;
+      acc[date].profit += curr.profit || 0;
+      return acc;
+    }, {});
+
+    const sortedData = Object.values(groupedData).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    return res.status(200).json(sortedData);
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching chart data", error: err.message });
+  }
+};
+
 module.exports = {
   getSalesCSV,
   getInventoryCSV,
-  getProfitCSV
+  getProfitCSV,
+  getSalesChartData
 };

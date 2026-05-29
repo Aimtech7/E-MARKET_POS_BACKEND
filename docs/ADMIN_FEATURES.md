@@ -27,3 +27,10 @@
 - Centrally configure Financial parameters like Default Tax Rate and Currency Symbol.
 - Configurable receipt footers.
 
+## Audit & Reporting
+- Centralized System Audit Logs tracking all mutating requests (POST, PUT, DELETE).
+- Detailed records including Timestamp, User, HTTP Method, URL, IP Address, and JSON Payload.
+- Interactive UI for Audit Logs (/audit).
+- Comprehensive Business Reports generation (Sales, Profit, Inventory snapshots).
+- Interactive recharts data visualization for Sales & Profit Trends over the last 7 days.
+

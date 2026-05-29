@@ -13,3 +13,7 @@
 - Implemented Soft Deletion via Product Archiving (Archive/Restore toggles).
 - Preserves invoice and reporting integrity while keeping the active product list clean.
 
+## Supplier Management
+- Added Supplier Management with full CRUD capabilities.
+- Allows setting Supplier Name, Contact, Email, Phone, and Address.
+

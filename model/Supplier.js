@@ -7,7 +7,8 @@ const SupplierSchema = new Schema({
   contactName: { type: String },
   email: { type: String },
   phone: { type: String },
-  address: { type: String }
+  address: { type: String },
+  isActive: { type: Boolean, default: true }
 });
 
 module.exports = mongoose.model("Supplier", SupplierSchema);

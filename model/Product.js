@@ -16,6 +16,7 @@ const Product = Schema({
   },
   productImage: { type: String, required:true },
   productPrice: { type: Number, required: true },
+  barcode: { type: String },
   stockQuantity: { type: Number, default: 0 },
   reorderLevel: { type: Number, default: 5 },
   expiryDate: { type: Date },

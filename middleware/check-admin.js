@@ -3,7 +3,7 @@ module.exports = (req, res, next) => {
     return next();
   }
   try {
-    if (!req.userData || !req.userData.admin) {
+    if (!req.userData || (!req.userData.admin && req.userData.role !== "admin")) {
       return res.status(403).json({ message: "Access Denied: You do not have administrator privileges." });
     }
     next();

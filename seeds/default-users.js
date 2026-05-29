@@ -13,7 +13,12 @@ const seedDefaultUsers = async () => {
       const adminUser = new User({
         username: "admin",
         password: adminPassword,
-        admin: true
+        fullName: "System Administrator",
+        email: "admin@emmarket.local",
+        phone: "+1 234 567 8900",
+        role: "admin",
+        admin: true,
+        isActive: true
       });
       await adminUser.save();
       console.log("-> Created default admin account (username: admin)");
@@ -22,7 +27,12 @@ const seedDefaultUsers = async () => {
       const cashierUser = new User({
         username: "cashier",
         password: cashierPassword,
-        admin: false
+        fullName: "Default Cashier",
+        email: "cashier@emmarket.local",
+        phone: "+1 234 567 8901",
+        role: "cashier",
+        admin: false,
+        isActive: true
       });
       await cashierUser.save();
       console.log("-> Created default cashier account (username: cashier)");

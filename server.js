@@ -37,6 +37,22 @@ app.use((req, res, next) => {
   next();
 });
 
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
+app.use(mongoSanitize());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+app.use(limiter);
+
 app.use(bodyParser.json());
 app.use(auditLogger);
 let gfsBucket;
@@ -82,13 +98,17 @@ app.get("/", async (req, res) => {
 
   return res.status(404).json({ message: "Error page not Found 404" });
 });
-mongoose
-  .connect(process.env.MONGOPATH)
-  .then(() => {
-    console.log("Connect to Database...");
-    app.listen(5500);
-    console.log("listening in port 5500");
-  })
-  .catch((err) => {
-    console.log(err.message);
-  });
+if (require.main === module) {
+  mongoose
+    .connect(process.env.MONGOPATH)
+    .then((res) => {
+      app.listen(process.env.PORT, () => {
+        console.log("SERVER RUNNING ON PORT " + process.env.PORT);
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+module.exports = app;

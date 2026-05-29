@@ -17,6 +17,7 @@ const analyticsRoute = require("./routes/analytics-route");
 const reportRoute = require("./routes/report-route");
 const settingsRoute = require("./routes/settings-route");
 const auditRoute = require("./routes/audit-route");
+const backupRoute = require("./routes/backup-route");
 
 let dotenv = require("dotenv").config();
 
@@ -54,7 +55,7 @@ app.use("/analytics", analyticsRoute);
 app.use("/reports", reportRoute);
 app.use("/settings", settingsRoute);
 app.use("/audit", auditRoute);
-
+app.use("/backups", backupRoute);
 
 app.get("/", async (req, res) => {
 

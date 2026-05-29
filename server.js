@@ -20,6 +20,10 @@ const auditRoute = require("./routes/audit-route");
 const backupRoute = require("./routes/backup-route");
 const refundRoute = require("./routes/refund-route");
 const closureRoute = require("./routes/closure-route");
+const customerRoute = require("./routes/customer-route");
+const notificationRoute = require("./routes/notification-route");
+const expenseRoute = require("./routes/expense-route");
+const debtRoute = require("./routes/debt-route");
 
 let dotenv = require("dotenv").config();
 
@@ -93,6 +97,10 @@ app.use("/audit", auditRoute);
 app.use("/backups", backupRoute);
 app.use("/refunds", refundRoute);
 app.use("/closures", closureRoute);
+app.use("/customer", customerRoute);
+app.use("/notifications", notificationRoute);
+app.use("/expenses", expenseRoute);
+app.use("/debts", debtRoute);
 
 app.get("/", async (req, res) => {
 

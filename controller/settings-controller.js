@@ -15,6 +15,8 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   const { shopName, address, phone, shopEmail, taxRate, currency, receiptFooter } = req.body;
+  const image = req.file;
+
   try {
     let settings = await StoreSettings.findOne();
     if (!settings) {
@@ -27,6 +29,9 @@ const updateSettings = async (req, res) => {
       if (taxRate !== undefined) settings.taxRate = taxRate;
       settings.currency = currency || settings.currency;
       settings.receiptFooter = receiptFooter || settings.receiptFooter;
+    }
+    if (image) {
+      settings.logo = "uploads/" + image.filename;
     }
     await settings.save();
     return res.status(200).json({ message: "Store settings updated successfully", settings });

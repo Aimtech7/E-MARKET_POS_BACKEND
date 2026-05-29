@@ -9,6 +9,7 @@ const StoreSettings = Schema({
   taxRate: { type: Number, default: 0 },
   currency: { type: String, default: "$" },
   receiptFooter: { type: String, default: "Thank you for shopping with us!" },
+  logo: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("StoreSettings", StoreSettings);

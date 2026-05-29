@@ -28,7 +28,15 @@ const updateProduct = async (req, res) => {
   const image = req.file;
   let product;
   let unit = await UnitOfMeasure.findOne({unitOfMeasureName:unitOfMeasure})
+  if (!unit && unitOfMeasure) {
+    unit = new UnitOfMeasure({ unitOfMeasureName: unitOfMeasure, baseUnitOfMeasure: unitOfMeasure, conversionFactor: 1 });
+    await unit.save();
+  }
   let cate = await Category.findOne({categoryName:productCategory})
+  if (!cate && productCategory) {
+    cate = new Category({ categoryName: productCategory });
+    await cate.save();
+  }
   try {
     const updateData = {
       productName,
@@ -43,7 +51,7 @@ const updateProduct = async (req, res) => {
       reorderLevel: parseInt(reorderLevel) || 5,
     };
     if (image) {
-      updateData.productImage = image.path;
+      updateData.productImage = "uploads/" + image.filename;
     }
 
     product = await Product.findByIdAndUpdate(
@@ -51,13 +59,8 @@ const updateProduct = async (req, res) => {
       updateData,
       { returnOriginal: true }
     );
-    if (image && product && product.productImage) {
-      try {
-        fs.unlinkSync(product.productImage);
-      } catch (err) {}
-    }
+    // fs.unlinkSync removed for GridFS compatibility
   } catch (err) {
-    if (image) fs.unlinkSync(image.path);
     console.log(err);
     return res
       .status(402)
@@ -66,7 +69,6 @@ const updateProduct = async (req, res) => {
   if (product) {
     return res.status(201).json({ message: "date have been updated" });
   }
-  fs.unlinkSync(image.path);
   return res.status(402).json({ message: "No match with this product" });
 };
 const deleteProduct = async (req, res) => {
@@ -110,14 +112,22 @@ const createProduct = async (req, res) => {
 
   let product;
   try {
+    let unit = await UnitOfMeasure.findOne({ unitOfMeasureName: unitOfMeasure });
+    if (!unit && unitOfMeasure) {
+      unit = new UnitOfMeasure({ unitOfMeasureName: unitOfMeasure, baseUnitOfMeasure: unitOfMeasure, conversionFactor: 1 });
+      await unit.save();
+    }
+    let cate = await Category.findOne({ categoryName: productCategory });
+    if (!cate && productCategory) {
+      cate = new Category({ categoryName: productCategory });
+      await cate.save();
+    }
+
     product = await Product.findOne({
       productName: productName,
-      unitOfMeasure: await UnitOfMeasure.findOne({
-        unitOfMeasureName: unitOfMeasure,
-      }),
+      unitOfMeasure: unit,
     });
   } catch (err) {
-    fs.unlinkSync(imagePath.path);
     return res
       .status(402)
       .json({ message: "Could not Create new product, please try again" });
@@ -145,17 +155,13 @@ const createProduct = async (req, res) => {
 
       product = new Product({
         productName: productName,
-        productCategory: await Category.findOne({
-          categoryName: productCategory,
-        }),
-        unitOfMeasure: await UnitOfMeasure.findOne({
-          unitOfMeasureName: unitOfMeasure,
-        }),
+        productCategory: cate,
+        unitOfMeasure: unit,
         productPrice: parseFloat(productPrice),
         costPrice: parseFloat(costPrice) || 0,
         sellingPrice: parseFloat(sellingPrice) || 0,
         profitMargin: parseFloat(profitMargin) || 0,
-        productImage: imagePath.path,
+        productImage: "uploads/" + imagePath.filename,
         stockQuantity: parseInt(stockQuantity) || 0,
         reorderLevel: parseInt(reorderLevel) || 5,
         expiryDate: expiryDate ? new Date(expiryDate) : undefined,
@@ -168,11 +174,9 @@ const createProduct = async (req, res) => {
       await product.save();
       return res.status(201).json({ id: product.id, product });
     } catch (err) {
-      fs.unlinkSync(imagePath.path);
       return res.status(402).json({ message: "Error registering product document: " + err.message });
     }
   }
-  fs.unlinkSync(imagePath.path);
   return res.status(402).json({ message: "The product is already exists" });
 };
 

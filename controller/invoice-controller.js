@@ -15,7 +15,7 @@ const generateInvoiceNumber = async () => {
 };
 
 const createInvoice = async (req, res) => {
-  const { cartId, amountPaid, changeGiven, paymentMethod } = req.body;
+  const { cartId, amountPaid, changeGiven, paymentMethod, payments, customerId } = req.body;
   const cashierName = req.userData ? req.userData.username : "Cashier";
 
   if (!cartId || amountPaid === undefined || changeGiven === undefined) {
@@ -49,6 +49,8 @@ const createInvoice = async (req, res) => {
       amountPaid,
       changeGiven,
       paymentMethod: paymentMethod || "Cash",
+      payments: payments || [],
+      customer: customerId || undefined,
     });
 
     await invoice.save();
@@ -91,6 +93,13 @@ const createInvoice = async (req, res) => {
 
     const StoreSettings = require("../model/StoreSettings");
     let settings = await StoreSettings.findOne();
+    
+    // Attempt to load customer for PDF if available
+    if (customerId) {
+      const Customer = require("../model/Customer");
+      invoice.customer = await Customer.findById(customerId);
+    }
+    
     await generateInvoicePDF(invoice, cart, absolutePdfPath, settings);
 
     invoice.pdfPath = `/uploads/invoices/${pdfFilename}`;

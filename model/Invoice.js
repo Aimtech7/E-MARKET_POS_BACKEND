@@ -9,6 +9,8 @@ const InvoiceSchema = new Schema({
   amountPaid: { type: Number, required: true },
   changeGiven: { type: Number, required: true },
   paymentMethod: { type: String, default: "Cash" },
+  payments: [{ method: String, amount: Number }],
+  customer: { type: Schema.Types.ObjectId, ref: "Customer" },
   timestamp: { type: Date, default: Date.now },
   pdfPath: { type: String }
 });

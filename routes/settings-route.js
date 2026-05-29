@@ -2,6 +2,7 @@ const express = require("express");
 const { getSettings, updateSettings } = require("../controller/settings-controller");
 const checkAuth = require("../middleware/check-auth");
 const checkAdmin = require("../middleware/check-admin");
+const fileUpload = require("../middleware/file-upload");
 
 const router = express.Router();
 
@@ -12,6 +13,6 @@ router.get("/", getSettings);
 
 // Only admins can update settings
 router.use(checkAdmin);
-router.put("/", updateSettings);
+router.put("/", fileUpload.single("logo"), updateSettings);
 
 module.exports = router;

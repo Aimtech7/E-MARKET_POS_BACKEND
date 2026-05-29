@@ -193,10 +193,70 @@ const getLowStockAnalytics = async (req, res) => {
   }
 };
 
+const getNetProfit = async (req, res) => {
+  try {
+    const { period } = req.query; // daily, weekly, monthly
+    const Expense = require("../model/Expense");
+    const now = new Date();
+    let start;
+
+    switch (period) {
+      case "daily":
+        start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        break;
+      case "weekly":
+        start = new Date(now);
+        start.setDate(start.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+        break;
+      case "monthly":
+      default:
+        start = new Date(now);
+        start.setDate(start.getDate() - 29);
+        start.setHours(0, 0, 0, 0);
+        break;
+    }
+
+    const end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+
+    // Revenue from receipts
+    const revenueResult = await Receipt.aggregate([
+      { $match: { timestamp: { $gte: start, $lte: end } } },
+      { $group: { _id: null, revenue: { $sum: "$grandTotal" }, cost: { $sum: "$totalCost" } } },
+    ]);
+
+    // Expenses
+    const expenseResult = await Expense.aggregate([
+      { $match: { date: { $gte: start, $lte: end } } },
+      { $group: { _id: null, totalExpenses: { $sum: "$amount" } } },
+    ]);
+
+    const revenue = revenueResult[0]?.revenue || 0;
+    const costOfGoods = revenueResult[0]?.cost || 0;
+    const expenses = expenseResult[0]?.totalExpenses || 0;
+    const grossProfit = revenue - costOfGoods;
+    const netProfit = grossProfit - expenses;
+
+    return res.status(200).json({
+      revenue,
+      costOfGoods,
+      grossProfit,
+      expenses,
+      netProfit,
+      period: period || "monthly",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching net profit", error: err.message });
+  }
+};
+
 module.exports = {
   getTodayAnalytics,
   getWeekAnalytics,
   getMonthAnalytics,
   getProductAnalytics,
   getLowStockAnalytics,
+  getNetProfit,
 };

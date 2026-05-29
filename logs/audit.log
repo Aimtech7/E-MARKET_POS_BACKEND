@@ -11,3 +11,15 @@
 [2026-05-29T02:41:36.270Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin@123"}
 [2026-05-29T02:41:36.457Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin@123"}
 [2026-05-29T09:44:05.310Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
+[2026-05-29T13:12:05.103Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
+[2026-05-29T13:27:43.151Z] IP: ::1 | User: admin | Action: POST /product/new | Payload: {"productName":"laptop","productCategory":"computers","unitOfMeasure":"1piece","productPrice":"30.95","reorderLevel":"55","costPrice":"25","sellingPrice":"30.69","profitMargin":"0","image":"undefined"}
+[2026-05-29T13:40:14.234Z] IP: ::1 | User: admin | Action: POST /product/new | Payload: {"productName":"laptops","productCategory":"computers","unitOfMeasure":"1piece","productPrice":"0.99","reorderLevel":"5","costPrice":"0","sellingPrice":"0","profitMargin":"0","image":"undefined"}
+[2026-05-29T13:40:31.915Z] IP: ::1 | User: admin | Action: POST /product/new | Payload: {"productName":"laptops","productCategory":"computers","unitOfMeasure":"1piece","productPrice":"0.99","reorderLevel":"5","costPrice":"0","sellingPrice":"0","profitMargin":"0","image":"undefined"}
+[2026-05-29T13:42:37.932Z] IP: ::1 | User: admin | Action: POST /category/new/ | Payload: {"categoryName":"computers"}
+[2026-05-29T13:42:50.443Z] IP: ::1 | User: admin | Action: POST /category/new/ | Payload: {"categoryName":"foodstuffs"}
+[2026-05-29T13:43:19.072Z] IP: ::1 | User: admin | Action: POST /supplier/new | Payload: {"id":"","supplierName":"aim","contactName":"austine","email":"austinemakwaka254@gmail.com","phone":"0705823941","address":"445","isActive":true}
+[2026-05-29T14:01:59.412Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-05-29T16:57:10.840Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-05-29T17:05:33.926Z] IP: ::1 | User: cashier | Action: POST /cart/check | Payload: {"description":"POS Supermarket Sale","tax":0,"discount":0,"products":[]}
+[2026-05-29T17:05:34.060Z] IP: ::1 | User: cashier | Action: POST /invoice | Payload: {"cartId":"6a19c75dfebbb462421780c8","amountPaid":0,"changeGiven":0,"payments":[]}
+[2026-05-29T17:05:34.162Z] IP: ::1 | User: cashier | Action: POST /receipt | Payload: {"invoiceId":"6a19c75dfebbb462421780cd","customer":"Walk-in"}

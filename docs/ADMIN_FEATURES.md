@@ -22,3 +22,8 @@
 - Track PO status (Draft, Ordered, Received, Cancelled).
 - Automatically update inventory stock upon receiving PO items.
 
+## Settings Management
+- Centrally manage Store Profile (Name, Address, Phone, Email).
+- Centrally configure Financial parameters like Default Tax Rate and Currency Symbol.
+- Configurable receipt footers.
+

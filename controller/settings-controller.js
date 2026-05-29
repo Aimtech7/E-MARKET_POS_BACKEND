@@ -14,15 +14,16 @@ const getSettings = async (req, res) => {
 };
 
 const updateSettings = async (req, res) => {
-  const { shopName, address, phone, taxRate, currency, receiptFooter } = req.body;
+  const { shopName, address, phone, shopEmail, taxRate, currency, receiptFooter } = req.body;
   try {
     let settings = await StoreSettings.findOne();
     if (!settings) {
-      settings = new StoreSettings({ shopName, address, phone, taxRate, currency, receiptFooter });
+      settings = new StoreSettings({ shopName, address, phone, shopEmail, taxRate, currency, receiptFooter });
     } else {
       settings.shopName = shopName || settings.shopName;
       settings.address = address || settings.address;
       settings.phone = phone || settings.phone;
+      settings.shopEmail = shopEmail || settings.shopEmail;
       if (taxRate !== undefined) settings.taxRate = taxRate;
       settings.currency = currency || settings.currency;
       settings.receiptFooter = receiptFooter || settings.receiptFooter;

@@ -13,6 +13,7 @@ const supplierRoute = require("./routes/supplier-route");
 const poRoute = require("./routes/po-route");
 const inventoryRoute = require("./routes/inventory-route");
 const receiptRoute = require("./routes/receipt-route");
+const analyticsRoute = require("./routes/analytics-route");
 
 let dotenv = require("dotenv").config();
 
@@ -47,6 +48,7 @@ app.use("/supplier", supplierRoute);
 app.use("/po", poRoute);
 app.use("/inventory", inventoryRoute);
 app.use("/receipt", receiptRoute);
+app.use("/analytics", analyticsRoute);
 
 
 app.get("/", async (req, res) => {

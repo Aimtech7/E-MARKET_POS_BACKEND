@@ -98,10 +98,16 @@ app.get("/", async (req, res) => {
 
   return res.status(404).json({ message: "Error page not Found 404" });
 });
+const seedDefaultUsers = require("./seeds/default-users");
+
 if (require.main === module) {
   mongoose
     .connect(process.env.MONGOPATH)
-    .then((res) => {
+    .then(async (res) => {
+      console.log("Connected to MongoDB.");
+      // Run the seeder logic
+      await seedDefaultUsers();
+      
       app.listen(process.env.PORT, () => {
         console.log("SERVER RUNNING ON PORT " + process.env.PORT);
       });

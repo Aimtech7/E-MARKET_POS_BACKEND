@@ -45,16 +45,23 @@ const login = async (req, res, next) => {
   try {
     user = await User.findOne({ username: username });
   } catch (err) {
+    console.error("Login Error:", err);
     return res
-      .status(500)
-      .json({ message: "cannot login , please try again " });
+      .status(503)
+      .json({ message: "Database unavailable, please try again" });
   }
   if (!user) {
-    return res.status(401).json({ message: "Invalid credentials " });
+    return res.status(401).json({ message: "Invalid username or password" });
   }
 
-  if (!(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({ message: "cannot crypt the password" });
+  try {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+  } catch (err) {
+    console.error("Bcrypt Error:", err);
+    return res.status(500).json({ message: "Authentication service error" });
   }
   let token;
   try {

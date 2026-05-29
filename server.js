@@ -19,6 +19,7 @@ const settingsRoute = require("./routes/settings-route");
 const auditRoute = require("./routes/audit-route");
 const backupRoute = require("./routes/backup-route");
 const refundRoute = require("./routes/refund-route");
+const closureRoute = require("./routes/closure-route");
 
 let dotenv = require("dotenv").config();
 
@@ -58,6 +59,7 @@ app.use("/settings", settingsRoute);
 app.use("/audit", auditRoute);
 app.use("/backups", backupRoute);
 app.use("/refunds", refundRoute);
+app.use("/closures", closureRoute);
 
 app.get("/", async (req, res) => {
 

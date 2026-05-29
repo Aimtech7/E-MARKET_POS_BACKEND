@@ -16,6 +16,7 @@ const receiptRoute = require("./routes/receipt-route");
 const analyticsRoute = require("./routes/analytics-route");
 const reportRoute = require("./routes/report-route");
 const settingsRoute = require("./routes/settings-route");
+const auditRoute = require("./routes/audit-route");
 
 let dotenv = require("dotenv").config();
 
@@ -52,6 +53,7 @@ app.use("/receipt", receiptRoute);
 app.use("/analytics", analyticsRoute);
 app.use("/reports", reportRoute);
 app.use("/settings", settingsRoute);
+app.use("/audit", auditRoute);
 
 
 app.get("/", async (req, res) => {

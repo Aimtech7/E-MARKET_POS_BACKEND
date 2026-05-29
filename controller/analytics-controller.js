@@ -22,6 +22,8 @@ const getTodayAnalytics = async (req, res) => {
         $group: {
           _id: null,
           revenue: { $sum: "$grandTotal" },
+          cost: { $sum: "$totalCost" },
+          profit: { $sum: "$profit" },
           orders: { $sum: 1 },
           averageSale: { $avg: "$grandTotal" },
         },
@@ -49,6 +51,8 @@ const getWeekAnalytics = async (req, res) => {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
           revenue: { $sum: "$grandTotal" },
+          cost: { $sum: "$totalCost" },
+          profit: { $sum: "$profit" },
           orders: { $sum: 1 },
         },
       },
@@ -63,6 +67,8 @@ const getWeekAnalytics = async (req, res) => {
       chartData.push({
         date: dateStr,
         revenue: found ? found.revenue : 0,
+        cost: found ? found.cost : 0,
+        profit: found ? found.profit : 0,
         orders: found ? found.orders : 0,
       });
     }
@@ -96,6 +102,8 @@ const getMonthAnalytics = async (req, res) => {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
           revenue: { $sum: "$grandTotal" },
+          cost: { $sum: "$totalCost" },
+          profit: { $sum: "$profit" },
           orders: { $sum: 1 },
         },
       },
@@ -109,17 +117,23 @@ const getMonthAnalytics = async (req, res) => {
       chartData.push({
         date: dateStr,
         revenue: found ? found.revenue : 0,
+        cost: found ? found.cost : 0,
+        profit: found ? found.profit : 0,
         orders: found ? found.orders : 0,
       });
     }
 
     const totalRevenue = chartData.reduce((acc, curr) => acc + curr.revenue, 0);
+    const totalCost = chartData.reduce((acc, curr) => acc + curr.cost, 0);
+    const totalProfit = chartData.reduce((acc, curr) => acc + curr.profit, 0);
     const totalOrders = chartData.reduce((acc, curr) => acc + curr.orders, 0);
 
     return res.status(200).json({
       chartData,
       summary: {
         revenue: totalRevenue,
+        cost: totalCost,
+        profit: totalProfit,
         orders: totalOrders,
       },
     });

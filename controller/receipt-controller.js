@@ -32,19 +32,24 @@ const createReceipt = async (req, res) => {
     const cart = invoice.cart;
     
     let subtotal = 0;
+    let totalCost = 0;
     const items = cart.products.map(p => {
       const itemTotal = p.qty * p.product.productPrice;
+      const itemCost = p.qty * (p.product.costPrice || 0);
       subtotal += itemTotal;
+      totalCost += itemCost;
       return {
         productName: p.product.productName,
         qty: p.qty,
         unitPrice: p.product.productPrice,
+        costPrice: p.product.costPrice || 0,
       };
     });
 
     const discountAmount = subtotal * cart.discount;
     const taxAmount = (subtotal - discountAmount) * cart.tax;
     const grandTotal = subtotal - discountAmount + taxAmount;
+    const profit = grandTotal - totalCost;
 
     const receiptNumber = await generateReceiptNumber();
 
@@ -55,6 +60,8 @@ const createReceipt = async (req, res) => {
       customer: customer || "Walk-in",
       cashier: invoice.cashier,
       items,
+      totalCost: parseFloat(totalCost.toFixed(2)),
+      profit: parseFloat(profit.toFixed(2)),
       subtotal: parseFloat(subtotal.toFixed(2)),
       discount: parseFloat(discountAmount.toFixed(2)),
       tax: parseFloat(taxAmount.toFixed(2)),

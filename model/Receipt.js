@@ -13,8 +13,11 @@ const ReceiptSchema = new Schema({
       productName: { type: String, required: true },
       qty: { type: Number, required: true },
       unitPrice: { type: Number, required: true },
+      costPrice: { type: Number, default: 0 },
     }
   ],
+  totalCost: { type: Number, default: 0 },
+  profit: { type: Number, default: 0 },
   subtotal: { type: Number, required: true },
   discount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },

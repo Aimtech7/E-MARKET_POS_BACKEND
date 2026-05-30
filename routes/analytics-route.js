@@ -7,7 +7,9 @@ const {
   getLowStockAnalytics,
   getNetProfit,
   getInventoryForecast,
-  getEmployeeAnalytics
+  getEmployeeAnalytics,
+  getInventoryValuation,
+  getExpiryAlerts
 } = require("../controller/analytics-controller");
 const checkAuth = require("../middleware/check-auth");
 
@@ -23,5 +25,7 @@ router.get("/low-stock", getLowStockAnalytics);
 router.get("/net-profit", getNetProfit);
 router.get("/forecast", getInventoryForecast);
 router.get("/employees", getEmployeeAnalytics);
+router.get("/valuation", getInventoryValuation);
+router.get("/expiry", getExpiryAlerts);
 
 module.exports = router;

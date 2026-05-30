@@ -354,6 +354,57 @@ const getEmployeeAnalytics = async (req, res) => {
   }
 };
 
+const getInventoryValuation = async (req, res) => {
+  try {
+    const products = await Product.find({ isArchived: false });
+    let totalValue = 0;
+    let totalRetailValue = 0;
+
+    products.forEach((prod) => {
+      const qty = prod.stockQuantity || 0;
+      const cost = prod.costPrice || 0;
+      const retail = prod.sellingPrice || prod.productPrice || 0;
+      totalValue += qty * cost;
+      totalRetailValue += qty * retail;
+    });
+
+    const potentialProfit = totalRetailValue - totalValue;
+
+    return res.status(200).json({
+      totalCostValue: totalValue,
+      totalRetailValue,
+      potentialProfit
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Error calculating inventory valuation", error: err.message });
+  }
+};
+
+const getExpiryAlerts = async (req, res) => {
+  try {
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    const expiringProducts = await Product.find({
+      isArchived: false,
+      expiryDate: { $lte: thirtyDaysFromNow, $gte: today }
+    }).sort({ expiryDate: 1 });
+
+    const expiredProducts = await Product.find({
+      isArchived: false,
+      expiryDate: { $lt: today }
+    }).sort({ expiryDate: 1 });
+
+    return res.status(200).json({
+      expiringIn30Days: expiringProducts,
+      alreadyExpired: expiredProducts
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching expiry alerts", error: err.message });
+  }
+};
+
 module.exports = {
   getTodayAnalytics,
   getWeekAnalytics,
@@ -362,5 +413,7 @@ module.exports = {
   getLowStockAnalytics,
   getNetProfit,
   getInventoryForecast,
-  getEmployeeAnalytics
+  getEmployeeAnalytics,
+  getInventoryValuation,
+  getExpiryAlerts
 };

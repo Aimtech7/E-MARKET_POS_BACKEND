@@ -24,6 +24,7 @@ const customerRoute = require("./routes/customer-route");
 const notificationRoute = require("./routes/notification-route");
 const expenseRoute = require("./routes/expense-route");
 const debtRoute = require("./routes/debt-route");
+const loyaltyRoute = require("./routes/loyalty-route");
 
 let dotenv = require("dotenv").config();
 
@@ -101,6 +102,7 @@ app.use("/customer", customerRoute);
 app.use("/notifications", notificationRoute);
 app.use("/expenses", expenseRoute);
 app.use("/debts", debtRoute);
+app.use("/loyalty", loyaltyRoute);
 
 app.get("/", async (req, res) => {
 

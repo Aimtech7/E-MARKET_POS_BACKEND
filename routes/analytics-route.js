@@ -9,7 +9,8 @@ const {
   getInventoryForecast,
   getEmployeeAnalytics,
   getInventoryValuation,
-  getExpiryAlerts
+  getExpiryAlerts,
+  getAiInsights
 } = require("../controller/analytics-controller");
 const checkAuth = require("../middleware/check-auth");
 
@@ -27,5 +28,6 @@ router.get("/forecast", getInventoryForecast);
 router.get("/employees", getEmployeeAnalytics);
 router.get("/valuation", getInventoryValuation);
 router.get("/expiry", getExpiryAlerts);
+router.get("/ai/insights", getAiInsights);
 
 module.exports = router;

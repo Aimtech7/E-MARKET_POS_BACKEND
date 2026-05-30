@@ -405,6 +405,77 @@ const getExpiryAlerts = async (req, res) => {
   }
 };
 
+const getAiInsights = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const insights = [];
+
+    // 1. Check Low Stock
+    const lowStockCount = await Product.countDocuments({ isArchived: false, stockQuantity: { $lt: 10 } });
+    if (lowStockCount > 0) {
+      insights.push({
+        type: "warning",
+        message: `You have ${lowStockCount} products running low on stock (under 10 units). Consider reviewing the Inventory Forecast dashboard to place orders soon.`
+      });
+    }
+
+    // 2. Check Expiries
+    const thirtyDays = new Date();
+    thirtyDays.setDate(thirtyDays.getDate() + 30);
+    const expiringCount = await Product.countDocuments({ isArchived: false, expiryDate: { $lte: thirtyDays, $gte: today } });
+    if (expiringCount > 0) {
+      insights.push({
+        type: "danger",
+        message: `${expiringCount} products are expiring within the next 30 days. Consider running a discount promotion to clear stock.`
+      });
+    }
+
+    // 3. Sales Trend
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Simple revenue calculation for today vs yesterday
+    const todayReceipts = await Receipt.find({ timestamp: { $gte: today } });
+    const todayRevenue = todayReceipts.reduce((sum, r) => sum + r.grandTotal, 0);
+
+    const yesterdayReceipts = await Receipt.find({ timestamp: { $gte: yesterday, $lt: today } });
+    const yesterdayRevenue = yesterdayReceipts.reduce((sum, r) => sum + r.grandTotal, 0);
+
+    if (yesterdayRevenue > 0) {
+      const growth = ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
+      if (growth > 10) {
+        insights.push({
+          type: "success",
+          message: `Great job! Today's revenue ($${todayRevenue.toFixed(2)}) is up ${growth.toFixed(1)}% compared to yesterday.`
+        });
+      } else if (growth < -10) {
+        insights.push({
+          type: "info",
+          message: `Sales are a bit slow today. Revenue is down ${Math.abs(growth).toFixed(1)}% compared to yesterday.`
+        });
+      }
+    } else if (todayRevenue > 0) {
+      insights.push({
+        type: "success",
+        message: `You've made $${todayRevenue.toFixed(2)} in sales today. Keep it up!`
+      });
+    }
+
+    if (insights.length === 0) {
+      insights.push({
+        type: "info",
+        message: "Everything is running smoothly! Stock levels are healthy, and no products are expiring soon."
+      });
+    }
+
+    return res.status(200).json({ insights });
+  } catch (err) {
+    return res.status(500).json({ message: "Failed to generate AI insights", error: err.message });
+  }
+};
+
 module.exports = {
   getTodayAnalytics,
   getWeekAnalytics,
@@ -415,5 +486,6 @@ module.exports = {
   getInventoryForecast,
   getEmployeeAnalytics,
   getInventoryValuation,
-  getExpiryAlerts
+  getExpiryAlerts,
+  getAiInsights
 };

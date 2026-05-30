@@ -252,6 +252,108 @@ const getNetProfit = async (req, res) => {
   }
 };
 
+const getInventoryForecast = async (req, res) => {
+  try {
+    // Phase 4 & 5: Inventory Forecasting & Smart Restock
+    // Average Daily Sales over the last 30 days
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    
+    // Aggregate item sales
+    const salesAgg = await Receipt.aggregate([
+      { $match: { timestamp: { $gte: start } } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product",
+          totalSold: { $sum: "$items.qty" },
+          productName: { $first: "$items.productName" }
+        }
+      }
+    ]);
+
+    // Fetch all products to get current stock
+    const products = await Product.find().populate("supplierReference");
+
+    const forecast = products.map((prod) => {
+      const soldData = salesAgg.find(s => s._id?.toString() === prod._id.toString());
+      const totalSold30Days = soldData ? soldData.totalSold : 0;
+      
+      const avgDailySales = totalSold30Days / 30;
+      const avgWeeklySales = avgDailySales * 7;
+      
+      const currentStock = prod.stockQuantity || 0;
+      let daysUntilStockOut = -1; // -1 means infinite/no sales
+      
+      if (avgDailySales > 0) {
+        daysUntilStockOut = Math.floor(currentStock / avgDailySales);
+      }
+
+      // Restock Engine: (Average Sales * Lead Time) + Safety Stock
+      // Assuming a standard Lead Time of 7 days and Safety Stock of 14 days
+      const leadTime = 7;
+      const safetyStock = Math.ceil(avgDailySales * 14);
+      const suggestedOrderQty = Math.ceil((avgDailySales * leadTime) + safetyStock - currentStock);
+      
+      return {
+        productId: prod._id,
+        productName: prod.productName,
+        currentStock,
+        avgDailySales: avgDailySales.toFixed(2),
+        avgWeeklySales: avgWeeklySales.toFixed(2),
+        daysUntilStockOut,
+        suggestedOrderQty: suggestedOrderQty > 0 ? suggestedOrderQty : 0,
+        supplier: prod.supplierReference?.supplierName || "Unknown"
+      };
+    });
+
+    // Sort by items closest to stock out
+    forecast.sort((a, b) => {
+      if (a.daysUntilStockOut === -1) return 1;
+      if (b.daysUntilStockOut === -1) return -1;
+      return a.daysUntilStockOut - b.daysUntilStockOut;
+    });
+
+    return res.status(200).json(forecast);
+  } catch (err) {
+    return res.status(500).json({ message: "Error forecasting inventory", error: err.message });
+  }
+};
+
+const getEmployeeAnalytics = async (req, res) => {
+  try {
+    const { period } = req.query; 
+    const now = new Date();
+    let start = new Date(now);
+    if (period === "daily") {
+      start.setHours(0, 0, 0, 0);
+    } else if (period === "weekly") {
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+    } else {
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+    }
+
+    const receiptAgg = await Receipt.aggregate([
+      { $match: { timestamp: { $gte: start } } },
+      {
+        $group: {
+          _id: "$cashier",
+          totalRevenue: { $sum: "$grandTotal" },
+          transactions: { $sum: 1 },
+          averageSale: { $avg: "$grandTotal" }
+        }
+      },
+      { $sort: { totalRevenue: -1 } }
+    ]);
+
+    return res.status(200).json(receiptAgg);
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching employee analytics", error: err.message });
+  }
+};
+
 module.exports = {
   getTodayAnalytics,
   getWeekAnalytics,
@@ -259,4 +361,6 @@ module.exports = {
   getProductAnalytics,
   getLowStockAnalytics,
   getNetProfit,
+  getInventoryForecast,
+  getEmployeeAnalytics
 };

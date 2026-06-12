@@ -28,17 +28,7 @@ jobs:
     - name: Install Dependencies
       run: npm install --legacy-peer-deps
 
-    - name: Build Electron App
-      run: npm run dist
+    - name: Build and Release Electron App
+      run: npm run dist -- -p always
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        generate_release_notes: true
-        draft: false
-        prerelease: false
-        files: |
-          dist/*.exe
-          dist/*.msi

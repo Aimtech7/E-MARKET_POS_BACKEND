@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const mongoose = require('mongoose');
 
@@ -57,6 +58,7 @@ app.on('ready', async () => {
   try {
     const url = await startServer();
     createWindow(url);
+    autoUpdater.checkForUpdatesAndNotify();
   } catch (err) {
     console.error("App initialization failed", err);
   }

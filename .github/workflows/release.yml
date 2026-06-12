@@ -26,7 +26,7 @@ jobs:
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
     - name: Install Dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
 
     - name: Build and Release Electron App
       run: npm run dist -- -p always

@@ -27,7 +27,7 @@
     "dist": "electron-builder"
   },
   "name": "emmarket-pos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.js",
   "author": "Wilson",
   "license": "ISC",
@@ -61,7 +61,7 @@
       ".env"
     ],
     "win": {
-      "target": ["nsis", "msi"]
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,

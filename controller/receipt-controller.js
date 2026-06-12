@@ -75,8 +75,8 @@ const createReceipt = async (req, res) => {
 
     // Generate PDF
     const pdfFilename = `${receiptNumber}.pdf`;
-    const relativePdfPath = path.join("uploads", "receipts", pdfFilename);
-    const absolutePdfPath = path.join(__dirname, "..", relativePdfPath);
+    const os = require("os");
+    const absolutePdfPath = path.join(os.tmpdir(), "emmarket_uploads", "receipts", pdfFilename);
 
     const StoreSettings = require("../model/StoreSettings");
     let settings = await StoreSettings.findOne();
@@ -125,7 +125,8 @@ const getReceiptPDF = async (req, res) => {
       return res.status(404).json({ message: "Receipt or PDF not found" });
     }
 
-    const absolutePdfPath = path.join(__dirname, "..", receipt.pdfPath);
+    const os = require("os");
+    const absolutePdfPath = path.join(os.tmpdir(), "emmarket_uploads", receipt.pdfPath.replace('/uploads/', ''));
     if (!fs.existsSync(absolutePdfPath)) {
       return res.status(404).json({ message: "Receipt PDF file not found on disk" });
     }

@@ -88,8 +88,8 @@ const createInvoice = async (req, res) => {
 
     // Generate PDF invoice
     const pdfFilename = `${invoiceNumber}.pdf`;
-    const relativePdfPath = path.join("uploads", "invoices", pdfFilename);
-    const absolutePdfPath = path.join(__dirname, "..", relativePdfPath);
+    const os = require("os");
+    const absolutePdfPath = path.join(os.tmpdir(), "emmarket_uploads", "invoices", pdfFilename);
 
     const StoreSettings = require("../model/StoreSettings");
     let settings = await StoreSettings.findOne();
@@ -157,7 +157,8 @@ const getInvoicePDF = async (req, res) => {
       return res.status(404).json({ message: "Invoice or PDF not found" });
     }
 
-    const absolutePdfPath = path.join(__dirname, "..", invoice.pdfPath);
+    const os = require("os");
+    const absolutePdfPath = path.join(os.tmpdir(), "emmarket_uploads", invoice.pdfPath.replace('/uploads/', ''));
     if (!fs.existsSync(absolutePdfPath)) {
       return res.status(404).json({ message: "Invoice PDF file not found on disk" });
     }

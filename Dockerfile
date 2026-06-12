@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies (skips electron and electron-builder)
-RUN npm install --production
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Bundle app source
 COPY . .

@@ -62,10 +62,7 @@
       ".env"
     ],
     "win": {
-      "target": [
-        "nsis",
-        "msi"
-      ]
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,

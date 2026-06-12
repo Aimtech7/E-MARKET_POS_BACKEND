@@ -20,16 +20,46 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest"
+    "test": "jest",
+    "electron:start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "name": "todolist-backend",
+  "name": "emmarket-pos",
   "version": "1.0.0",
-  "main": "server.js",
-  "author": "",
+  "main": "main.js",
+  "author": "Wilson",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.2",
     "jest": "^30.4.2",
     "supertest": "^7.2.2"
+  },
+  "build": {
+    "appId": "com.emmarket.pos",
+    "productName": "EMMARKET POS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "client-build/**/*",
+      "!node_modules/electron/**/*",
+      "!node_modules/electron-builder/**/*"
+    ],
+    "extraFiles": [
+      ".env"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "client-build/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

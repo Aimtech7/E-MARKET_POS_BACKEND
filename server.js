@@ -104,9 +104,12 @@ app.use("/expenses", expenseRoute);
 app.use("/debts", debtRoute);
 app.use("/loyalty", loyaltyRoute);
 
-app.get("/", async (req, res) => {
+const path = require("path");
+const clientBuildPath = path.join(__dirname, "client-build");
+app.use(express.static(clientBuildPath));
 
-  return res.status(404).json({ message: "Error page not Found 404" });
+app.get("*", async (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
 });
 const seedDefaultUsers = require("./seeds/default-users");
 

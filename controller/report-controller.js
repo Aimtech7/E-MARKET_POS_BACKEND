@@ -7,9 +7,9 @@ const getSalesCSV = async (req, res) => {
   try {
     let query = {};
     if (start && end) {
-      query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+      query.timestamp = { $gte: new Date(start), $lte: new Date(end) };
     }
-    const receipts = await Receipt.find(query).sort({ createdAt: -1 });
+    const receipts = await Receipt.find(query).sort({ timestamp: -1 });
     
     if (!receipts || receipts.length === 0) {
       return res.status(404).json({ message: "No sales data found for this period" });
@@ -17,10 +17,10 @@ const getSalesCSV = async (req, res) => {
 
     const data = receipts.map((r) => ({
       ReceiptNumber: r.receiptNumber,
-      Date: r.createdAt.toISOString().split("T")[0],
-      Time: r.createdAt.toISOString().split("T")[1].split(".")[0],
-      Cashier: r.cashierName,
-      TotalAmount: r.totalAmount.toFixed(2),
+      Date: r.timestamp ? r.timestamp.toISOString().split("T")[0] : "-",
+      Time: r.timestamp ? r.timestamp.toISOString().split("T")[1].split(".")[0] : "-",
+      Cashier: r.cashier,
+      TotalAmount: r.grandTotal ? r.grandTotal.toFixed(2) : "0.00",
       ItemsCount: r.items.length,
       PaymentMethod: r.paymentMethod || "Cash",
     }));

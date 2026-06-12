@@ -27,7 +27,7 @@
     "dist": "electron-builder"
   },
   "name": "emmarket-pos",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "main.js",
   "author": "Wilson",
   "license": "ISC",

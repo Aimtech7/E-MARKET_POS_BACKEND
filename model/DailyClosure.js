@@ -11,6 +11,7 @@ const DailyClosureSchema = new Schema({
   totalSales: { type: Number, required: true },
   totalRefunds: { type: Number, required: true },
   notes: { type: String },
+  isSynced: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now },
 });
 

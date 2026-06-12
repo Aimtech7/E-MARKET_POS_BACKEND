@@ -14,6 +14,7 @@ const PurchaseOrderSchema = new Schema({
   items: [PurchaseOrderItemSchema],
   status: { type: String, enum: ["Draft", "Ordered", "Received", "Cancelled"], default: "Draft" },
   totalAmount: { type: Number, required: true },
+  isSynced: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now }
 });
 

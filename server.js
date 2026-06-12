@@ -61,7 +61,7 @@ app.use(limiter);
 app.use(bodyParser.json());
 app.use(auditLogger);
 let gfsBucket;
-mongoose.connection.once("open", () => {
+mongoose.connection.on("open", () => {
   gfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
     bucketName: "uploads"
   });
@@ -114,20 +114,20 @@ app.get("*", async (req, res) => {
 const seedDefaultUsers = require("./seeds/default-users");
 
 if (require.main === module) {
-  mongoose
-    .connect(process.env.MONGOPATH)
-    .then(async (res) => {
-      console.log("Connected to MongoDB.");
-      // Run the seeder logic
-      await seedDefaultUsers();
-      
-      app.listen(process.env.PORT, () => {
-        console.log("SERVER RUNNING ON PORT " + process.env.PORT);
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+  const connectionManager = require("./services/connection-manager");
+  connectionManager.startMonitoring().then(async () => {
+    const syncService = require("./services/sync-service");
+    syncService.startBackgroundSync();
+    
+    // Run the seeder logic
+    await seedDefaultUsers();
+    
+    app.listen(process.env.PORT, () => {
+      console.log("SERVER RUNNING ON PORT " + process.env.PORT);
     });
+  }).catch((err) => {
+    console.log(err);
+  });
 }
 
 module.exports = app;

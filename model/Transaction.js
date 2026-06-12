@@ -9,6 +9,7 @@ const TransactionSchema = new Schema({
   paymentMethod: { type: String, required: true },
   totalAmount: { type: Number, required: true },
   type: { type: String, enum: ["sale", "refund", "void"], default: "sale" },
+  isSynced: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now }
 });
 

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -16,10 +16,10 @@ async function startServer() {
   const MONGOPATH = process.env.MONGOPATH || "mongodb://127.0.0.1:27017/emmarket_production";
 
   try {
-    if (mongoose.connection.readyState !== 1) {
-      await mongoose.connect(MONGOPATH);
-      console.log("Connected to MongoDB from Electron.");
-    }
+    const connectionManager = require('./services/connection-manager');
+    await connectionManager.startMonitoring();
+    const syncService = require('./services/sync-service');
+    syncService.startBackgroundSync();
     await seedDefaultUsers();
     
     return new Promise((resolve) => {
@@ -61,6 +61,12 @@ app.on('ready', async () => {
     autoUpdater.checkForUpdatesAndNotify();
   } catch (err) {
     console.error("App initialization failed", err);
+    dialog.showErrorBox("Database Connection Failed", 
+      "The EMMARKET POS system failed to start because it could not connect to the database.\n\n" +
+      "Error Details:\n" + err.message + "\n\n" +
+      "If you are running this on a new PC offline, make sure MongoDB is installed locally, or check your internet connection if using a cloud database."
+    );
+    app.quit();
   }
 });
 

@@ -12,6 +12,7 @@ const ExpenseSchema = new Schema({
   date: { type: Date, default: Date.now },
   notes: { type: String },
   createdBy: { type: String },
+  isSynced: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now },
 });
 

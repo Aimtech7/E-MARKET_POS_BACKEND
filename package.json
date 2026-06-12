@@ -27,7 +27,7 @@
     "dist": "electron-builder"
   },
   "name": "emmarket-pos",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "main.js",
   "author": "Wilson",
   "license": "ISC",
@@ -45,7 +45,8 @@
       {
         "provider": "github",
         "owner": "Aimtech7",
-        "repo": "E-MARKET_POS_BACKEND"
+        "repo": "E-MARKET_POS_BACKEND",
+        "releaseType": "release"
       }
     ],
     "directories": {

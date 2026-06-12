@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  pos-api:
+    build: .
+    ports:
+      - "5500:5500"
+    environment:
+      - PORT=5500
+      - LOCAL_MONGOPATH=mongodb://mongo:27017/emmarket_pos
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret}
+      - PAYSTACK_PUBLIC_KEY=${PAYSTACK_PUBLIC_KEY}
+      - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
+      - PAYSTACK_WEBHOOK_SECRET=${PAYSTACK_WEBHOOK_SECRET}
+      - MPESA_CONSUMER_KEY=${MPESA_CONSUMER_KEY}
+      - MPESA_CONSUMER_SECRET=${MPESA_CONSUMER_SECRET}
+      - MPESA_SHORTCODE=${MPESA_SHORTCODE}
+      - MPESA_PASSKEY=${MPESA_PASSKEY}
+      - WEBHOOK_DOMAIN=${WEBHOOK_DOMAIN}
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

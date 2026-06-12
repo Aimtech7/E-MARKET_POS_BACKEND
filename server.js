@@ -25,6 +25,7 @@ const notificationRoute = require("./routes/notification-route");
 const expenseRoute = require("./routes/expense-route");
 const debtRoute = require("./routes/debt-route");
 const loyaltyRoute = require("./routes/loyalty-route");
+const paymentRoute = require("./routes/payment-route");
 
 let dotenv = require("dotenv").config();
 
@@ -103,6 +104,8 @@ app.use("/notifications", notificationRoute);
 app.use("/expenses", expenseRoute);
 app.use("/debts", debtRoute);
 app.use("/loyalty", loyaltyRoute);
+app.use("/payments", paymentRoute);
+app.use("/api/payments", paymentRoute); // Required for Paystack/M-Pesa production endpoints
 
 const path = require("path");
 const clientBuildPath = path.join(__dirname, "client-build");

@@ -82,7 +82,13 @@ const startMonitoring = async () => {
     }
   }
 
-  // Set up interval
+  // Skip periodic internet checks if running in the cloud
+  if (process.env.RENDER || process.env.NODE_ENV === "production" || process.env.CLOUD_MONGOPATH) {
+    console.log("[ConnectionManager] Cloud environment detected. Disabling periodic internet checks.");
+    return;
+  }
+
+  // Set up interval for local desktop app only
   setInterval(async () => {
     const currentlyOnline = await checkInternet();
     

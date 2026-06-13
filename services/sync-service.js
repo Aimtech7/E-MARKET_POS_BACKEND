@@ -5,6 +5,10 @@ const LOCAL_URI = process.env.LOCAL_MONGOPATH || "mongodb://127.0.0.1:27017/emma
 
 const pushOfflineData = async () => {
     if (!CLOUD_URI) return;
+    if (process.env.RENDER || process.env.NODE_ENV === "production") {
+        console.log("[SyncService] Running in cloud environment. Skipping offline sync.");
+        return;
+    }
     try {
         console.log("[SyncService] Starting push of offline data to cloud...");
         const localDb = await mongoose.createConnection(LOCAL_URI).asPromise();
@@ -59,6 +63,9 @@ const pushOfflineData = async () => {
 
 const pullCatalogData = async () => {
     if (!CLOUD_URI) return;
+    if (process.env.RENDER || process.env.NODE_ENV === "production") {
+        return;
+    }
     try {
         console.log("[SyncService] Starting pull of catalog data from cloud...");
         const localDb = await mongoose.createConnection(LOCAL_URI).asPromise();

@@ -140,14 +140,26 @@ const login = async (req, res, next) => {
     return res.status(403).json({ message: "Account is disabled. Please contact the administrator." });
   }
 
+  let isMatch = false;
   try {
-    const isMatch = await bcrypt.compare(password, user.password);
+    if (user.password && !user.password.startsWith('$2a$') && !user.password.startsWith('$2b$')) {
+      // Handle plain-text password (if user manually inserted via DB UI)
+      isMatch = (password === user.password);
+      if (isMatch) {
+         console.log("Upgrading plaintext password to bcrypt hash for user:", user.username);
+         user.password = await bcrypt.hash(password, 12);
+         await user.save();
+      }
+    } else {
+      isMatch = await bcrypt.compare(password, user.password);
+    }
+    
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
   } catch (err) {
     console.error("Bcrypt Error:", err);
-    return res.status(500).json({ message: "Authentication service error" });
+    return res.status(500).json({ message: "Authentication service error: " + err.message });
   }
   
   let token;

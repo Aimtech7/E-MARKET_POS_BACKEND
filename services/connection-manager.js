@@ -50,6 +50,10 @@ const connectToDb = async (mode) => {
     return true;
   } catch (err) {
     console.error(`[ConnectionManager] Failed to connect to ${mode} database:`, err.message);
+    if (process.env.RENDER) {
+      console.error("FATAL: Cannot connect to MongoDB in production. Server will crash to prevent 503 errors.");
+      process.exit(1);
+    }
     return false;
   }
 };

@@ -116,6 +116,17 @@ const path = require("path");
 const clientBuildPath = path.join(__dirname, "client-build");
 app.use(express.static(clientBuildPath));
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    dbState: mongoose.connection.readyState,
+    hasCloudUri: !!process.env.CLOUD_MONGOPATH,
+    cloudUriPrefix: process.env.CLOUD_MONGOPATH ? process.env.CLOUD_MONGOPATH.substring(0, 15) + "..." : null,
+    hasSecretEnv: require('fs').existsSync("/etc/secrets/.env"),
+    renderEnv: !!process.env.RENDER
+  });
+});
+
 app.get("*", async (req, res) => {
   res.sendFile(path.join(clientBuildPath, "index.html"));
 });

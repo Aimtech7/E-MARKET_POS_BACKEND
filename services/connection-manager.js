@@ -55,14 +55,27 @@ const connectToDb = async (mode) => {
 };
 
 const startMonitoring = async () => {
-  // Initial connection
-  const online = await checkInternet();
-  if (online && CLOUD_URI) {
-    await connectToDb('cloud');
-    isOnline = true;
+  // If we are on Render or production, always use cloud if available
+  if (process.env.RENDER || process.env.NODE_ENV === "production" || process.env.CLOUD_MONGOPATH) {
+    if (CLOUD_URI) {
+      console.log("[ConnectionManager] Cloud environment detected. Connecting to CLOUD_URI...");
+      await connectToDb('cloud');
+      isOnline = true;
+    } else {
+      console.warn("[ConnectionManager] Cloud environment but CLOUD_MONGOPATH is not set! Trying local...");
+      await connectToDb('local');
+      isOnline = false;
+    }
   } else {
-    await connectToDb('local');
-    isOnline = false;
+    // Initial connection for local desktop app
+    const online = await checkInternet();
+    if (online && CLOUD_URI) {
+      await connectToDb('cloud');
+      isOnline = true;
+    } else {
+      await connectToDb('local');
+      isOnline = false;
+    }
   }
 
   // Set up interval

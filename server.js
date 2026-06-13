@@ -27,7 +27,12 @@ const debtRoute = require("./routes/debt-route");
 const loyaltyRoute = require("./routes/loyalty-route");
 const paymentRoute = require("./routes/payment-route");
 
-let dotenv = require("dotenv").config();
+const fs = require('fs');
+if (fs.existsSync("/etc/secrets/.env")) {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+} else {
+  require("dotenv").config();
+}
 
 const app = express();
 app.use((req, res, next) => {

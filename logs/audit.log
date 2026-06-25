@@ -24,3 +24,11 @@
 [2026-05-29T17:05:34.060Z] IP: ::1 | User: cashier | Action: POST /invoice | Payload: {"cartId":"6a19c75dfebbb462421780c8","amountPaid":0,"changeGiven":0,"payments":[]}
 [2026-05-29T17:05:34.162Z] IP: ::1 | User: cashier | Action: POST /receipt | Payload: {"invoiceId":"6a19c75dfebbb462421780cd","customer":"Walk-in"}
 [2026-05-30T04:46:40.834Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-06-25T18:17:19.825Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
+[2026-06-25T18:20:50.620Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
+[2026-06-25T18:21:16.955Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
+[2026-06-25T18:21:22.743Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
+[2026-06-25T18:21:25.265Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
+[2026-06-25T18:21:26.332Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
+[2026-06-25T18:23:08.830Z] IP: ::1 | User: Anonymous | Action: POST /payments/mpesa/stkpush | Payload: {"phoneNumber":"0723373424","amount":10,"transactionId":"12345"}
+[2026-06-25T18:25:56.085Z] IP: ::1 | User: Anonymous | Action: POST /payments/mpesa/stkpush | Payload: {"phoneNumber":"0723373424","amount":10,"transactionId":"12345"}

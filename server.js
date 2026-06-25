@@ -1,3 +1,10 @@
+const fs = require('fs');
+if (fs.existsSync("/etc/secrets/.env")) {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+} else {
+  require("dotenv").config();
+}
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const { default: mongoose } = require("mongoose");
@@ -26,13 +33,6 @@ const expenseRoute = require("./routes/expense-route");
 const debtRoute = require("./routes/debt-route");
 const loyaltyRoute = require("./routes/loyalty-route");
 const paymentRoute = require("./routes/payment-route");
-
-const fs = require('fs');
-if (fs.existsSync("/etc/secrets/.env")) {
-  require("dotenv").config({ path: "/etc/secrets/.env" });
-} else {
-  require("dotenv").config();
-}
 
 const app = express();
 app.use((req, res, next) => {
@@ -115,6 +115,7 @@ app.use("/api/payments", paymentRoute); // Required for Paystack/M-Pesa producti
 const path = require("path");
 const clientBuildPath = path.join(__dirname, "client-build");
 app.use(express.static(clientBuildPath));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.get("/api/health", (req, res) => {
   res.json({

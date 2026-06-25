@@ -14,6 +14,9 @@ const paymentLimiter = rateLimit({
 router.post("/mpesa/stkpush", paymentLimiter, paymentController.initiateMpesaPayment);
 router.post("/mpesa/webhook", paymentController.mpesaWebhook);
 router.get("/mpesa/status/:reference", paymentController.verifyMpesaPayment);
+router.post("/mpesa/c2b/register", paymentController.registerMpesaC2bUrls);
+router.post("/mpesa/c2b/validation", paymentController.mpesaC2bValidation);
+router.post("/mpesa/c2b/confirmation", paymentController.mpesaC2bConfirmation);
 
 // Paystack routes
 router.post("/paystack/initialize", paymentLimiter, paymentController.initiatePaystackPayment);

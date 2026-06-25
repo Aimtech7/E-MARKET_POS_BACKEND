@@ -4,7 +4,7 @@ const { createBackup, restoreBackup } = require("../services/backup-service");
 const triggerBackup = async (req, res) => {
   const username = req.userData ? req.userData.username : "Admin";
   try {
-    const uri = process.env.MONGOPATH;
+    const uri = process.env.CLOUD_MONGOPATH || process.env.LOCAL_MONGOPATH || process.env.MONGOPATH;
     const { filename, size } = await createBackup(uri);
     
     const backup = new Backup({
@@ -43,7 +43,7 @@ const triggerRestore = async (req, res) => {
   }
 
   try {
-    const uri = process.env.MONGOPATH;
+    const uri = process.env.CLOUD_MONGOPATH || process.env.LOCAL_MONGOPATH || process.env.MONGOPATH;
     await restoreBackup(uri, filename);
     return res.status(200).json({ message: "Database restored successfully" });
   } catch (err) {

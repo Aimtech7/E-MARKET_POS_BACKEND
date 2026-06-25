@@ -26,7 +26,7 @@ const initiateMpesaPayment = async (req, res) => {
       return res.status(400).json({ message: "Phone number, amount, and transactionId are required" });
     }
 
-    const webhookDomain = process.env.WEBHOOK_DOMAIN || "http://localhost:5500";
+    const webhookDomain = process.env.WEBHOOK_DOMAIN || "https://e-market-pos-backend.onrender.com";
     const callbackUrl = process.env.MPESA_CALLBACK_URL || `${webhookDomain}/payments/mpesa/webhook`;
     // We override the service callback url with our dynamic one if needed
     mpesaService.callbackUrl = callbackUrl;
@@ -110,6 +110,42 @@ const verifyMpesaPayment = async (req, res) => {
   }
 };
 
+const registerMpesaC2bUrls = async (req, res) => {
+  try {
+    const { validationUrl, confirmationUrl } = req.body;
+    const data = await mpesaService.registerC2bUrls(validationUrl, confirmationUrl);
+    res.status(200).json({ message: "C2B URLs registered successfully", data });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to register C2B URLs" });
+  }
+};
+
+const mpesaC2bValidation = async (req, res) => {
+  res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
+};
+
+const mpesaC2bConfirmation = async (req, res) => {
+  try {
+    const payload = req.body;
+    await PaymentLog.create({
+      provider: "mpesa",
+      type: "c2b_confirmation",
+      payload: payload,
+      webhookPayload: payload,
+      status: "received"
+    });
+
+    const transId = payload.TransID;
+    if (transId) {
+      await markTransactionComplete(transId, payload);
+    }
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
+  } catch (error) {
+    console.error("C2B Confirmation Error:", error);
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
+  }
+};
+
 // --- PAYSTACK ---
 
 const initiatePaystackPayment = async (req, res) => {
@@ -121,7 +157,7 @@ const initiatePaystackPayment = async (req, res) => {
     }
 
     const reference = `PAYSTACK_${transactionId}_${Date.now()}`;
-    const webhookDomain = process.env.WEBHOOK_DOMAIN || "http://localhost:5500";
+    const webhookDomain = process.env.WEBHOOK_DOMAIN || "https://e-market-pos-backend.onrender.com";
     const callbackUrl = `${webhookDomain}/payments/paystack/verify/${reference}`;
     
     const response = await paystackService.initializePayment(email, amount, reference, callbackUrl);
@@ -198,6 +234,9 @@ module.exports = {
   initiateMpesaPayment,
   mpesaWebhook,
   verifyMpesaPayment,
+  registerMpesaC2bUrls,
+  mpesaC2bValidation,
+  mpesaC2bConfirmation,
   initiatePaystackPayment,
   paystackWebhook,
   verifyPaystackPayment

@@ -14,7 +14,7 @@ const DUMMY_IMAGE_URL = "https://via.placeholder.com/150";
 async function runSeeder() {
   try {
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGOPATH || "mongodb://localhost:27017/emmarket_production");
+    await mongoose.connect(process.env.CLOUD_MONGOPATH || process.env.LOCAL_MONGOPATH || "mongodb://localhost:27017/emmarket_production");
 
     // 1. Seed Users
     await seedDefaultUsers();
@@ -23,6 +23,9 @@ async function runSeeder() {
     console.log("Creating categories and units...");
     const catBeverages = await Category.findOneAndUpdate({ categoryName: "Beverages" }, { categoryName: "Beverages" }, { upsert: true, new: true });
     const catSnacks = await Category.findOneAndUpdate({ categoryName: "Snacks" }, { categoryName: "Snacks" }, { upsert: true, new: true });
+    const catGroceries = await Category.findOneAndUpdate({ categoryName: "Groceries" }, { categoryName: "Groceries" }, { upsert: true, new: true });
+    const catDairy = await Category.findOneAndUpdate({ categoryName: "Dairy & Bakery" }, { categoryName: "Dairy & Bakery" }, { upsert: true, new: true });
+    const catPersonalCare = await Category.findOneAndUpdate({ categoryName: "Personal Care" }, { categoryName: "Personal Care" }, { upsert: true, new: true });
     
     const unitPcs = await UnitOfMeasure.findOneAndUpdate({ unitOfMeasureName: "pcs" }, { unitOfMeasureName: "pcs", baseUnitOfMeasure: "pcs", conversionFactor: 1 }, { upsert: true, new: true });
     const unitBox = await UnitOfMeasure.findOneAndUpdate({ unitOfMeasureName: "box" }, { unitOfMeasureName: "box", baseUnitOfMeasure: "box", conversionFactor: 1 }, { upsert: true, new: true });
@@ -68,6 +71,84 @@ async function runSeeder() {
         stockQuantity: 50,
         sku: "SKU-OREO-125",
         barcode: "123456789014"
+      },
+      {
+        productName: "Brookside Fresh Whole Milk 500ml",
+        productCategory: catDairy._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 65.0,
+        costPrice: 52.0,
+        sellingPrice: 65.0,
+        profitMargin: 20.0,
+        stockQuantity: 80,
+        sku: "SKU-MILK-126",
+        barcode: "123456789015"
+      },
+      {
+        productName: "Supa Loaf Sliced Brown Bread 400g",
+        productCategory: catDairy._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 70.0,
+        costPrice: 55.0,
+        sellingPrice: 70.0,
+        profitMargin: 21.4,
+        stockQuantity: 45,
+        sku: "SKU-BRD-127",
+        barcode: "123456789016"
+      },
+      {
+        productName: "Rapa Pishori Rice 2kg",
+        productCategory: catGroceries._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 450.0,
+        costPrice: 380.0,
+        sellingPrice: 450.0,
+        profitMargin: 15.5,
+        stockQuantity: 120,
+        sku: "SKU-RICE-128",
+        barcode: "123456789017"
+      },
+      {
+        productName: "Rina Sunflower Cooking Oil 1L",
+        productCategory: catGroceries._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 320.0,
+        costPrice: 270.0,
+        sellingPrice: 320.0,
+        profitMargin: 15.6,
+        stockQuantity: 95,
+        sku: "SKU-OIL-129",
+        barcode: "123456789018"
+      },
+      {
+        productName: "Colgate Herbal Toothpaste 100ml",
+        productCategory: catPersonalCare._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 180.0,
+        costPrice: 140.0,
+        sellingPrice: 180.0,
+        profitMargin: 22.2,
+        stockQuantity: 60,
+        sku: "SKU-COLG-130",
+        barcode: "123456789019"
+      },
+      {
+        productName: "Tusker Lager Beer 500ml",
+        productCategory: catBeverages._id,
+        unitOfMeasure: unitPcs._id,
+        productImage: "public\\uploads\\dummy.jpg",
+        productPrice: 250.0,
+        costPrice: 190.0,
+        sellingPrice: 250.0,
+        profitMargin: 24.0,
+        stockQuantity: 240,
+        sku: "SKU-TSK-131",
+        barcode: "123456789020"
       }
     ];
 

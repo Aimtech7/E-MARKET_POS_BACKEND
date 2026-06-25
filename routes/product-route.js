@@ -7,10 +7,12 @@ const checkAdmin = require("../middleware/check-admin");
 
 const router = express.Router();
 
+// Allow public/browser rendering of barcode images without JWT auth
+router.get('/:id/barcode', getProductBarcodeImage);
+
 router.use(checkAuth);
 
-router.get('/products',getAllProduct)
-router.get('/:id/barcode', getProductBarcodeImage)
+router.get('/products',getAllProduct);
 
 router.use(checkAdmin);
 

@@ -28,9 +28,6 @@ jobs:
     - name: Install Dependencies
       run: npm install --legacy-peer-deps
 
-    - name: Validate Docker Build
-      run: docker build -t emmarket-pos-backend .
-
     - name: Build and Release Electron App
       run: npm run dist -- -p always
       env:

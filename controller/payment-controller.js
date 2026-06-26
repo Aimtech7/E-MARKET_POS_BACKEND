@@ -3,15 +3,36 @@ const paystackService = require("../services/paystack-service");
 const PaymentLog = require("../model/PaymentLog");
 const Transaction = require("../model/Transaction");
 const Invoice = require("../model/Invoice");
+const Receipt = require("../model/Receipt");
 
-const markTransactionComplete = async (externalReference, metadata) => {
+const markTransactionComplete = async (externalReference, metadata, extractedData = {}) => {
   const transaction = await Transaction.findOneAndUpdate(
     { externalReference },
     { paymentStatus: "completed", paymentMetadata: metadata },
     { new: true }
-  );
+  ).populate("invoice");
+
   if (transaction && transaction.invoice) {
-    await Invoice.findByIdAndUpdate(transaction.invoice, { paymentStatus: "Paid" });
+    const inv = transaction.invoice;
+    await Invoice.findByIdAndUpdate(inv._id || inv, { paymentStatus: "Paid", amountPaid: inv.amountPaid || extractedData.Amount || transaction.totalAmount });
+    
+    // Priority 1: Automatic Sale Update (Generate Receipt if missing)
+    try {
+      const existingReceipt = await Receipt.findOne({ invoiceReference: inv._id || inv });
+      if (!existingReceipt) {
+        await Receipt.create({
+          receiptNumber: `RCP-${Date.now()}`,
+          invoiceReference: inv._id || inv,
+          cartReference: inv.cart || inv._id,
+          cashier: transaction.cashier || inv.cashier || "System",
+          subtotal: inv.amountPaid || transaction.totalAmount,
+          grandTotal: inv.amountPaid || transaction.totalAmount,
+          amountPaid: extractedData.Amount || inv.amountPaid || transaction.totalAmount,
+          changeGiven: 0,
+          paymentMethod: "M-Pesa"
+        });
+      }
+    } catch (e) { console.error("Auto Receipt Generation Error:", e.message); }
   }
   return transaction;
 };
@@ -28,12 +49,10 @@ const initiateMpesaPayment = async (req, res) => {
 
     const webhookDomain = process.env.WEBHOOK_DOMAIN || "https://e-market-pos-backend.onrender.com";
     const callbackUrl = process.env.MPESA_CALLBACK_URL || `${webhookDomain}/payments/mpesa/webhook`;
-    // We override the service callback url with our dynamic one if needed
     mpesaService.callbackUrl = callbackUrl;
     
-    const response = await mpesaService.initiateStkPush(phoneNumber, amount, `TRX-${transactionId}`, "POS Payment");
+    const response = await mpesaService.initiateStkPush(phoneNumber, amount, `TRX-${transactionId}`);
     
-    // Save the CheckoutRequestID to the transaction so we can match it in the webhook
     if (response.CheckoutRequestID) {
       await Transaction.findOneAndUpdate(
         { transactionNumber: transactionId },
@@ -55,38 +74,50 @@ const mpesaWebhook = async (req, res) => {
   try {
     const payload = req.body;
     
+    // Priority 1: Callback Authenticity & Security Validation
+    if (!payload || !payload.Body || !payload.Body.stkCallback) {
+      return res.status(400).json({ message: "Invalid callback authenticity" });
+    }
+
+    const stkCallback = payload.Body.stkCallback;
+    const callbackItems = stkCallback.CallbackMetadata?.Item || [];
+    const getVal = (name) => callbackItems.find(i => i.Name === name)?.Value;
+
+    const extractedData = {
+      CheckoutRequestID: stkCallback.CheckoutRequestID,
+      MerchantRequestID: stkCallback.MerchantRequestID,
+      ResultCode: stkCallback.ResultCode,
+      ResultDesc: stkCallback.ResultDesc,
+      MpesaReceiptNumber: getVal("MpesaReceiptNumber"),
+      TransactionDate: getVal("TransactionDate"),
+      PhoneNumber: getVal("PhoneNumber"),
+      Amount: getVal("Amount")
+    };
+
     await PaymentLog.create({
       provider: "mpesa",
       type: "webhook_callback",
-      payload: payload,
+      payload: extractedData,
       webhookPayload: payload,
-      status: "received"
+      status: stkCallback.ResultCode === 0 ? "success" : "failed"
     });
 
-    const stkCallback = payload?.Body?.stkCallback;
-    if (stkCallback) {
-      const checkoutRequestID = stkCallback.CheckoutRequestID;
-      const resultCode = stkCallback.ResultCode; // 0 is success
-      const resultDesc = stkCallback.ResultDesc;
-      
-      const status = resultCode === 0 ? "completed" : "failed";
+    const checkoutRequestID = stkCallback.CheckoutRequestID;
+    const status = stkCallback.ResultCode === 0 ? "completed" : "failed";
 
-      if (status === "completed") {
-        await markTransactionComplete(checkoutRequestID, stkCallback);
-      } else {
-        await Transaction.findOneAndUpdate(
-          { externalReference: checkoutRequestID },
-          { paymentStatus: status, paymentMetadata: stkCallback }
-        );
-      }
+    if (status === "completed") {
+      await markTransactionComplete(checkoutRequestID, extractedData, extractedData);
+    } else {
+      await Transaction.findOneAndUpdate(
+        { externalReference: checkoutRequestID },
+        { paymentStatus: "failed", paymentMetadata: extractedData }
+      );
     }
 
-    // Acknowledge receipt to Safaricom
     res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
   } catch (error) {
     console.error("M-Pesa Webhook Error:", error);
-    // Still return 200 so Safaricom doesn't keep retrying
-    res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted but failed to process internally" });
+    res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
   }
 };
 

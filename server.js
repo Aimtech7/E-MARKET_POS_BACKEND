@@ -33,6 +33,10 @@ const expenseRoute = require("./routes/expense-route");
 const debtRoute = require("./routes/debt-route");
 const loyaltyRoute = require("./routes/loyalty-route");
 const paymentRoute = require("./routes/payment-route");
+// Priority 2 & 5: Commercial Retail Document & Purchase Routes
+const deliveryNoteRoute = require("./routes/deliveryNote-route");
+const quotationRoute = require("./routes/quotation-route");
+const grnRoute = require("./routes/grn-route");
 
 const app = express();
 app.use((req, res, next) => {
@@ -110,7 +114,10 @@ app.use("/expenses", expenseRoute);
 app.use("/debts", debtRoute);
 app.use("/loyalty", loyaltyRoute);
 app.use("/payments", paymentRoute);
-app.use("/api/payments", paymentRoute); // Required for Paystack/M-Pesa production endpoints
+app.use("/api/payments", paymentRoute);
+app.use("/delivery-notes", deliveryNoteRoute);
+app.use("/quotations", quotationRoute);
+app.use("/grn", grnRoute);
 
 const path = require("path");
 const clientBuildPath = path.join(__dirname, "client-build");

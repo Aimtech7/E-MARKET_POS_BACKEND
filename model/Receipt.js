@@ -29,4 +29,7 @@ const ReceiptSchema = new Schema({
   pdfPath: { type: String }
 });
 
+ReceiptSchema.index({ timestamp: -1 });
+ReceiptSchema.index({ cashier: 1, timestamp: -1 });
+
 module.exports = mongoose.model("Receipt", ReceiptSchema);

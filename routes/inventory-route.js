@@ -3,7 +3,8 @@ const {
   getInventoryLogs,
   adjustStock,
   addStock,
-  removeStock
+  removeStock,
+  getLowStockAlerts
 } = require("../controller/inventory-controller");
 const checkAuth = require("../middleware/check-auth");
 const checkAdmin = require("../middleware/check-admin");
@@ -13,6 +14,7 @@ const router = express.Router();
 router.use(checkAuth);
 
 router.get("/logs", getInventoryLogs);
+router.get("/low-stock", getLowStockAlerts);
 
 router.use(checkAdmin);
 

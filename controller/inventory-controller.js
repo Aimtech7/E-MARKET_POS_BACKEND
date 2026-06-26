@@ -72,9 +72,22 @@ const adjustStock = (req, res) => _updateStock(req, res, "adjustment", "adjust")
 const addStock = (req, res) => _updateStock(req, res, "add", "add");
 const removeStock = (req, res) => _updateStock(req, res, "remove", "remove");
 
+const getLowStockAlerts = async (req, res) => {
+  try {
+    const lowStockItems = await Product.find({
+      $expr: { $lte: ["$stockQuantity", "$reorderLevel"] },
+      isArchived: { $ne: true }
+    }).populate("productCategory unitOfMeasure");
+    return res.status(200).json(lowStockItems);
+  } catch (err) {
+    return res.status(500).json({ message: "Error retrieving low stock alerts", error: err.message });
+  }
+};
+
 module.exports = {
   getInventoryLogs,
   adjustStock,
   addStock,
-  removeStock
+  removeStock,
+  getLowStockAlerts
 };

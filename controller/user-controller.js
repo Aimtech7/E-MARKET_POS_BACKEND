@@ -165,6 +165,16 @@ const login = async (req, res, next) => {
         fullName: `${username} (Local Mode)`
       });
     }
+    const AuditLog = require("../model/AuditLog");
+    try {
+      await AuditLog.create({
+        ip: req.ip || req.connection?.remoteAddress || "127.0.0.1",
+        username: username,
+        method: "POST",
+        url: req.originalUrl || "/user/login",
+        payload: { action: "FAILED_LOGIN", reason: "Username not found" }
+      });
+    } catch(e) {}
     return res.status(401).json({ message: "Invalid username or password" });
   }
 
@@ -187,6 +197,16 @@ const login = async (req, res, next) => {
     }
     
     if (!isMatch) {
+      const AuditLog = require("../model/AuditLog");
+      try {
+        await AuditLog.create({
+          ip: req.ip || req.connection?.remoteAddress || "127.0.0.1",
+          username: username,
+          method: "POST",
+          url: req.originalUrl || "/user/login",
+          payload: { action: "FAILED_LOGIN", reason: "Invalid password attempt" }
+        });
+      } catch(e) {}
       return res.status(401).json({ message: "Invalid username or password" });
     }
   } catch (err) {

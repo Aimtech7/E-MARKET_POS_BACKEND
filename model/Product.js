@@ -26,7 +26,18 @@ const Product = Schema({
   batchNumber: { type: String },
   supplierReference: { type: Schema.Types.ObjectId, ref: "Supplier" },
   sku: { type: String, unique: true, sparse: true },
-  isArchived: { type: Boolean, default: false }
-});
+  isArchived: { type: Boolean, default: false },
+  // Priority 4: Commercial Bookshop Attributes
+  isbn: { type: String, sparse: true, index: true },
+  author: { type: String, index: true },
+  publisher: { type: String },
+  edition: { type: String },
+  language: { type: String, default: "English" },
+  genre: { type: String, index: true },
+  shelfLocation: { type: String }
+}, { timestamps: true });
+
+// Performance index for rapid searching across commercial POS & Bookshop attributes
+Product.index({ productName: 'text', isbn: 'text', author: 'text', barcode: 'text', sku: 'text', genre: 'text' });
 
 module.exports = mongoose.model("Product", Product);

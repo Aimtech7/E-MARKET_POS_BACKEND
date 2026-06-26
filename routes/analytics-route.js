@@ -10,7 +10,8 @@ const {
   getEmployeeAnalytics,
   getInventoryValuation,
   getExpiryAlerts,
-  getAiInsights
+  getAiInsights,
+  getDashboardSummary
 } = require("../controller/analytics-controller");
 const checkAuth = require("../middleware/check-auth");
 
@@ -18,6 +19,7 @@ const router = express.Router();
 
 router.use(checkAuth);
 
+router.get("/dashboard", getDashboardSummary);
 router.get("/today", getTodayAnalytics);
 router.get("/week", getWeekAnalytics);
 router.get("/month", getMonthAnalytics);

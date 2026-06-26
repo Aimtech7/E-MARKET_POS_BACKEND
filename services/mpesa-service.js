@@ -21,37 +21,41 @@ class MpesaService {
 
   async generateToken() {
     this.initConfig();
+    // Priority 1: Token Caching & Automatic Refresh
+    if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
+      return this.cachedToken;
+    }
+
     const auth = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
     try {
       const response = await fetch(`${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-        headers: {
-          Authorization: `Basic ${auth}`
-        }
+        headers: { Authorization: `Basic ${auth}` }
       });
       const text = await response.text();
       let data = {};
-      try {
-        if (text) data = JSON.parse(text);
-      } catch (e) {}
+      try { if (text) data = JSON.parse(text); } catch (e) {}
 
       if (!response.ok) {
-        throw new Error(data.errorMessage || `Safaricom Daraja API Error HTTP ${response.status} (Check Consumer Key/Secret or Go-Live Activation)`);
+        throw new Error(data.errorMessage || `Safaricom Daraja API Error HTTP ${response.status} (Check Consumer Key/Secret)`);
       }
-      return data.access_token;
+      
+      this.cachedToken = data.access_token;
+      // Cache for 55 minutes (Safaricom tokens expire in 60 mins)
+      this.tokenExpiry = Date.now() + (55 * 60 * 1000);
+      return this.cachedToken;
     } catch (error) {
       console.error("M-Pesa Token Error:", error.message);
       throw error;
     }
   }
 
-  async initiateStkPush(phoneNumber, amount, accountReference = "POS Payment", transactionDesc = "Payment") {
+  async initiateStkPush(phoneNumber, amount, saleId = "POS Payment") {
     this.initConfig();
     try {
       const token = await this.generateToken();
       const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
       const password = Buffer.from(`${this.shortcode}${this.passkey}${timestamp}`).toString('base64');
 
-      // Safaricom requires phone numbers in the format 2547XXXXXXXX
       let formattedPhone = phoneNumber;
       if (formattedPhone.startsWith("0")) formattedPhone = `254${formattedPhone.slice(1)}`;
       else if (formattedPhone.startsWith("+")) formattedPhone = formattedPhone.slice(1);
@@ -60,17 +64,16 @@ class MpesaService {
         BusinessShortCode: this.shortcode,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: this.transactionType, // or CustomerPayBillOnline
+        TransactionType: this.transactionType,
         Amount: amount,
         PartyA: formattedPhone,
         PartyB: this.shortcode,
         PhoneNumber: formattedPhone,
         CallBackURL: this.callbackUrl,
-        AccountReference: accountReference,
-        TransactionDesc: transactionDesc
+        AccountReference: String(saleId).slice(0, 12),
+        TransactionDesc: `Sale ${saleId}`.slice(0, 13)
       };
 
-      // Log request
       await PaymentLog.create({
         provider: "mpesa",
         type: "request",
@@ -88,12 +91,10 @@ class MpesaService {
       });
 
       const data = await response.json();
-      
       if (!response.ok) {
         throw new Error(data.errorMessage || "STK Push failed");
       }
-
-      return data; // contains CheckoutRequestID
+      return data;
     } catch (error) {
       console.error("M-Pesa STK Push Error:", error);
       throw error;
@@ -131,6 +132,19 @@ class MpesaService {
     } catch (error) {
       console.error("M-Pesa Query Error:", error);
       throw error;
+    }
+  }
+
+  // Priority 1: Transaction Requery with Automatic Exponential Backoff Retries
+  async queryStatusWithRetry(checkoutRequestID, maxRetries = 3, delayMs = 3000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await this.queryStatus(checkoutRequestID);
+        return result;
+      } catch (err) {
+        if (attempt === maxRetries) throw err;
+        await new Promise(res => setTimeout(res, delayMs * attempt));
+      }
     }
   }
 

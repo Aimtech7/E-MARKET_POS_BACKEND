@@ -26,6 +26,13 @@ const getAllProduct = async (req, res) => {
   let product;
   try {
     const filter = includeArchived ? {} : { isArchived: { $ne: true } };
+    if (req.query.search) {
+      const q = new RegExp(req.query.search, 'i');
+      filter.$or = [
+        { productName: q }, { barcode: q }, { sku: q }, 
+        { isbn: q }, { author: q }, { publisher: q }, { genre: q }
+      ];
+    }
     product = await Product.find(filter).populate([
       "productCategory",
       "unitOfMeasure",

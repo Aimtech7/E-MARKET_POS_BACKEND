@@ -123,9 +123,69 @@ const getSalesChartData = async (req, res) => {
   }
 };
 
+const getDailyReconciliation = async (req, res) => {
+  try {
+    const start = new Date(); start.setHours(0,0,0,0);
+    const end = new Date(); end.setHours(23,59,59,999);
+
+    const receipts = await Receipt.find({ timestamp: { $gte: start, $lte: end } });
+    let cash = 0, mpesa = 0, paystack = 0, card = 0;
+
+    receipts.forEach(r => {
+      const method = (r.paymentMethod || "cash").toLowerCase();
+      if (method.includes("mpesa")) mpesa += r.grandTotal;
+      else if (method.includes("paystack")) paystack += r.grandTotal;
+      else if (method.includes("card")) card += r.grandTotal;
+      else cash += r.grandTotal;
+    });
+
+    const totalExpected = cash + mpesa + paystack + card;
+    return res.status(200).json({
+      date: new Date().toISOString().split("T")[0],
+      expected: { cash, mpesa, paystack, card, total: totalExpected }
+    });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
+};
+
+const getProfitLossReport = async (req, res) => {
+  try {
+    const Expense = require("../model/Expense");
+    const start = req.query.start ? new Date(req.query.start) : new Date(Date.now() - 30*24*3600*1000);
+    const end = req.query.end ? new Date(req.query.end) : new Date();
+
+    const salesAgg = await Receipt.aggregate([
+      { $match: { timestamp: { $gte: start, $lte: end } } },
+      { $group: { _id: null, revenue: { $sum: "$grandTotal" }, cost: { $sum: "$totalCost" }, grossProfit: { $sum: "$profit" } } }
+    ]);
+
+    const expAgg = await Expense.aggregate([
+      { $match: { date: { $gte: start, $lte: end } } },
+      { $group: { _id: null, totalExp: { $sum: "$amount" } } }
+    ]);
+
+    const rev = salesAgg[0]?.revenue || 0;
+    const cog = salesAgg[0]?.cost || 0;
+    const gp = salesAgg[0]?.grossProfit || 0;
+    const oexp = expAgg[0]?.totalExp || 0;
+    const netProfit = gp - oexp;
+
+    return res.status(200).json({
+      period: { start, end },
+      revenue: rev,
+      costOfGoodsSold: cog,
+      grossProfit: gp,
+      operatingExpenses: oexp,
+      netProfit,
+      status: netProfit >= 0 ? "Profitable" : "Loss"
+    });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
+};
+
 module.exports = {
   getSalesCSV,
   getInventoryCSV,
   getProfitCSV,
-  getSalesChartData
+  getSalesChartData,
+  getDailyReconciliation,
+  getProfitLossReport
 };

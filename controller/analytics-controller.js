@@ -476,6 +476,75 @@ const getAiInsights = async (req, res) => {
   }
 };
 
+const getDashboardSummary = async (req, res) => {
+  try {
+    const { start, end } = getDayBounds(new Date());
+    const Expense = require("../model/Expense");
+    const PurchaseOrder = require("../model/PurchaseOrder");
+    const DebtTransaction = require("../model/DebtTransaction");
+    const Transaction = require("../model/Transaction");
+
+    // Today receipts
+    const todayAgg = await Receipt.aggregate([
+      { $match: { timestamp: { $gte: start, $lte: end } } },
+      { $group: { _id: null, revenue: { $sum: "$grandTotal" }, profit: { $sum: "$profit" } } }
+    ]);
+
+    const todaySales = todayAgg[0]?.revenue || 0;
+    const todayProfit = todayAgg[0]?.profit || 0;
+
+    // Expenses
+    const expAgg = await Expense.aggregate([
+      { $match: { date: { $gte: start, $lte: end } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+    const expenses = expAgg[0]?.total || 0;
+
+    // Pending Purchases
+    const pendingPurchases = await PurchaseOrder.countDocuments({ status: { $in: ["Draft", "Ordered"] } });
+
+    // Low Stock
+    const lowStockCount = await Product.countDocuments({ 
+      $expr: { $lte: ["$stockQuantity", { $ifNull: ["$reorderLevel", 5] }] },
+      isArchived: { $ne: true }
+    });
+
+    // Best & Worst Selling
+    const productSales = await Receipt.aggregate([
+      { $unwind: "$items" },
+      { $group: { _id: "$items.productName", qtySold: { $sum: "$items.qty" } } },
+      { $sort: { qtySold: -1 } }
+    ]);
+
+    const bestSellingProducts = productSales.slice(0, 5);
+    const worstSellingProducts = [...productSales].reverse().slice(0, 5);
+
+    // Outstanding Debts
+    const debtsAgg = await DebtTransaction.aggregate([
+      { $match: { isSettled: { $ne: true } } },
+      { $group: { _id: null, totalDebt: { $sum: "$amount" } } }
+    ]);
+    const outstandingDebts = debtsAgg[0]?.totalDebt || 0;
+
+    // Recent Transactions
+    const recentTransactions = await Transaction.find().sort({ timestamp: -1 }).limit(10);
+
+    return res.status(200).json({
+      todaySales,
+      todayProfit,
+      expenses,
+      pendingPurchases,
+      lowStockCount,
+      bestSellingProducts,
+      worstSellingProducts,
+      outstandingDebts,
+      recentTransactions
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Error generating dashboard summary", error: err.message });
+  }
+};
+
 module.exports = {
   getTodayAnalytics,
   getWeekAnalytics,
@@ -487,5 +556,6 @@ module.exports = {
   getEmployeeAnalytics,
   getInventoryValuation,
   getExpiryAlerts,
-  getAiInsights
+  getAiInsights,
+  getDashboardSummary
 };

@@ -31,29 +31,21 @@ const connectToDb = async (mode) => {
       return false;
     }
     
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 3000 });
     currentMode = mode;
     console.log(`[ConnectionManager] Successfully connected to ${mode.toUpperCase()} database.`);
     
     if (mode === 'cloud') {
-      // Trigger sync upload when we come back online
       try {
         const syncService = require('./sync-service');
         if (syncService && syncService.pushOfflineData) {
           syncService.pushOfflineData().catch(console.error);
         }
-      } catch (e) {
-        // sync-service might not be fully implemented yet
-        console.warn("[ConnectionManager] Sync service not found or threw error:", e.message);
-      }
+      } catch (e) {}
     }
     return true;
   } catch (err) {
     console.error(`[ConnectionManager] Failed to connect to ${mode} database:`, err.message);
-    if (process.env.RENDER) {
-      console.error("FATAL: Cannot connect to MongoDB in production. Server will crash to prevent 503 errors.");
-      process.exit(1);
-    }
     return false;
   }
 };

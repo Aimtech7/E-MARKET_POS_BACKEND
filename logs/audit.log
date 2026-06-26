@@ -36,3 +36,5 @@
 [2026-06-26T02:41:39.276Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
 [2026-06-26T02:44:15.491Z] IP: ::1 | User: Anonymous | Action: POST /cart/check | Payload: {"description":"description","tax":0.4,"discount":0.4,"products":[]}
 [2026-06-26T04:03:25.741Z] IP: ::1 | User: Anonymous | Action: POST /payments/mpesa/stkpush | Payload: {"phoneNumber":"0723373424","amount":10,"transactionId":"12345"}
+[2026-06-26T04:15:50.533Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
+[2026-06-26T04:16:25.701Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}

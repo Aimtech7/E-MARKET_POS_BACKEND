@@ -139,8 +139,9 @@ if (require.main === module) {
     const syncService = require("./services/sync-service");
     syncService.startBackgroundSync();
     
-    // Run the seeder logic
-    await seedDefaultUsers();
+    if (mongoose.connection.readyState === 1) {
+      try { await seedDefaultUsers(); } catch(e){}
+    }
     
     app.listen(process.env.PORT, () => {
       console.log("SERVER RUNNING ON PORT " + process.env.PORT);

@@ -274,8 +274,6 @@ const restoreProduct = async (req, res) => {
   }
 };
 
-const fetch = require("node-fetch");
-
 const fetchBookMetadataByIsbn = async (req, res) => {
   const { isbn } = req.params;
   const cleanIsbn = String(isbn).replace(/[^0-9X]/gi, '');

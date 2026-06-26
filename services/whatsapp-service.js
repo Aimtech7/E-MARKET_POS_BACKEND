@@ -1,4 +1,3 @@
-const fetch = require("node-fetch");
 const Notification = require("../model/Notification");
 
 class WhatsappService {

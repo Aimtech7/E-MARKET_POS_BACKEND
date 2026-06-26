@@ -131,6 +131,10 @@ const login = async (req, res, next) => {
   } catch (err) {
     console.error("Login Error:", err);
     if (username === "admin" || username === "cashier") {
+      const validPass = username === "admin" ? "admin123" : "cashier123";
+      if (password !== validPass) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
       console.log("Database offline. Issuing Local Mode emergency token for:", username);
       const isAdmin = username === "admin";
       const token = jwt.sign({ username, admin: isAdmin, role: isAdmin ? "admin" : "cashier" }, "app_token", { expiresIn: "24h" });
@@ -147,6 +151,10 @@ const login = async (req, res, next) => {
   
   if (!user) {
     if (mongoose.connection.readyState !== 1 && (username === "admin" || username === "cashier")) {
+      const validPass = username === "admin" ? "admin123" : "cashier123";
+      if (password !== validPass) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
       const isAdmin = username === "admin";
       const token = jwt.sign({ username, admin: isAdmin, role: isAdmin ? "admin" : "cashier" }, "app_token", { expiresIn: "24h" });
       return res.status(201).json({

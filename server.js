@@ -146,6 +146,9 @@ if (require.main === module) {
     const syncService = require("./services/sync-service");
     syncService.startBackgroundSync();
     
+    const notificationCron = require("./services/notification-cron");
+    notificationCron.start();
+    
     if (mongoose.connection.readyState === 1) {
       try { await seedDefaultUsers(); } catch(e){}
     }

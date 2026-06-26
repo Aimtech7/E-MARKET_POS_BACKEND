@@ -4,6 +4,7 @@ const PaymentLog = require("../model/PaymentLog");
 const Transaction = require("../model/Transaction");
 const Invoice = require("../model/Invoice");
 const Receipt = require("../model/Receipt");
+const whatsappService = require("../services/whatsapp-service");
 
 const markTransactionComplete = async (externalReference, metadata, extractedData = {}) => {
   const transaction = await Transaction.findOneAndUpdate(
@@ -18,9 +19,9 @@ const markTransactionComplete = async (externalReference, metadata, extractedDat
     
     // Priority 1: Automatic Sale Update (Generate Receipt if missing)
     try {
-      const existingReceipt = await Receipt.findOne({ invoiceReference: inv._id || inv });
-      if (!existingReceipt) {
-        await Receipt.create({
+      let activeReceipt = await Receipt.findOne({ invoiceReference: inv._id || inv });
+      if (!activeReceipt) {
+        activeReceipt = await Receipt.create({
           receiptNumber: `RCP-${Date.now()}`,
           invoiceReference: inv._id || inv,
           cartReference: inv.cart || inv._id,
@@ -31,6 +32,9 @@ const markTransactionComplete = async (externalReference, metadata, extractedDat
           changeGiven: 0,
           paymentMethod: "M-Pesa"
         });
+      }
+      if (extractedData.PhoneNumber || transaction.customerPhone) {
+        whatsappService.sendDigitalReceipt(extractedData.PhoneNumber || transaction.customerPhone, activeReceipt).catch(e => {});
       }
     } catch (e) { console.error("Auto Receipt Generation Error:", e.message); }
   }

@@ -274,6 +274,64 @@ const restoreProduct = async (req, res) => {
   }
 };
 
+const fetch = require("node-fetch");
+
+const fetchBookMetadataByIsbn = async (req, res) => {
+  const { isbn } = req.params;
+  const cleanIsbn = String(isbn).replace(/[^0-9X]/gi, '');
+  
+  try {
+    const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const bookKey = `ISBN:${cleanIsbn}`;
+    
+    if (data && data[bookKey]) {
+      const b = data[bookKey];
+      return res.status(200).json({
+        isbn: cleanIsbn,
+        title: b.title || "",
+        author: (b.authors || []).map(a => a.name).join(", "),
+        publisher: (b.publishers || []).map(p => p.name).join(", "),
+        publishDate: b.publish_date || "",
+        pages: b.number_of_pages || 0,
+        subjects: (b.subjects || []).slice(0, 5).map(s => s.name).join(", "),
+        coverUrl: b.cover?.medium || b.cover?.large || ""
+      });
+    }
+    return res.status(404).json({ message: "ISBN metadata not found in Open Library index" });
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching ISBN metadata", error: err.message });
+  }
+};
+
+const generateThermalBarcodeLabels = async (req, res) => {
+  const { id } = req.params;
+  const bwipjs = require("bwip-js");
+  try {
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const barcodeText = product.barcode || product.isbn || product.sku || product._id.toString().slice(-8);
+    
+    bwipjs.toBuffer({
+      bcid: "code128",
+      text: barcodeText,
+      scale: 3,
+      height: 12,
+      includetext: true,
+      textxalign: "center"
+    }, (err, png) => {
+      if (err) return res.status(500).json({ message: "Label generator error", error: err.message });
+      res.contentType("image/png");
+      res.setHeader("Content-Disposition", `inline; filename="label_${barcodeText}.png"`);
+      return res.send(png);
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Label output error", error: err.message });
+  }
+};
+
 exports.getAllProduct = getAllProduct;
 exports.deleteProduct = deleteProduct;
 exports.updateProduct = updateProduct;
@@ -282,3 +340,5 @@ exports.clearAll = clearAll;
 exports.getProductBarcodeImage = getProductBarcodeImage;
 exports.archiveProduct = archiveProduct;
 exports.restoreProduct = restoreProduct;
+exports.fetchBookMetadataByIsbn = fetchBookMetadataByIsbn;
+exports.generateThermalBarcodeLabels = generateThermalBarcodeLabels;

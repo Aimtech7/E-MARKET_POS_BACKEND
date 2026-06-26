@@ -181,11 +181,21 @@ const getProfitLossReport = async (req, res) => {
   } catch (err) { return res.status(500).json({ message: err.message }); }
 };
 
+const etimsService = require("../services/etims-service");
+
+const getKraEtimsDailySummary = async (req, res) => {
+  try {
+    const report = await etimsService.getDailyTaxReport();
+    res.status(200).json(report);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+};
+
 module.exports = {
   getSalesCSV,
   getInventoryCSV,
   getProfitCSV,
   getSalesChartData,
   getDailyReconciliation,
-  getProfitLossReport
+  getProfitLossReport,
+  getKraEtimsDailySummary
 };

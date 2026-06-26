@@ -38,3 +38,4 @@
 [2026-06-26T04:03:25.741Z] IP: ::1 | User: Anonymous | Action: POST /payments/mpesa/stkpush | Payload: {"phoneNumber":"0723373424","amount":10,"transactionId":"12345"}
 [2026-06-26T04:15:50.533Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
 [2026-06-26T04:16:25.701Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
+[2026-06-26T05:38:30.912Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"cashier","password":"cashier123"}

@@ -1,5 +1,5 @@
 const express = require("express");
-const { getSalesCSV, getInventoryCSV, getProfitCSV, getSalesChartData, getDailyReconciliation, getProfitLossReport } = require("../controller/report-controller");
+const { getSalesCSV, getInventoryCSV, getProfitCSV, getSalesChartData, getDailyReconciliation, getProfitLossReport, getKraEtimsDailySummary } = require("../controller/report-controller");
 const checkAuth = require("../middleware/check-auth");
 const checkAdmin = require("../middleware/check-admin");
 
@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(checkAuth);
 router.use(checkAdmin);
 
+router.get("/etims/daily", getKraEtimsDailySummary);
 router.get("/reconciliation", getDailyReconciliation);
 router.get("/profit-loss", getProfitLossReport);
 router.get("/sales/csv", getSalesCSV);

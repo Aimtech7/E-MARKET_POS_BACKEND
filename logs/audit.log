@@ -39,3 +39,15 @@
 [2026-06-26T04:15:50.533Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
 [2026-06-26T04:16:25.701Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"admin","password":"admin123"}
 [2026-06-26T05:38:30.912Z] IP: ::1 | User: Anonymous | Action: POST /user/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-06-26T07:04:30.935Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-06-26T07:04:40.979Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/refresh | Payload: {"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhc2hpZXIiLCJpYXQiOjE3ODI0NTc0NzAsImV4cCI6MTc4MzA2MjI3MH0.NsurkuBK5QI-5h9pTGfll_psYIn3Ts_MgpZgKriMSuI"}
+[2026-06-26T07:04:40.994Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/logout | Payload: {}
+[2026-06-26T07:04:41.008Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {}
+[2026-06-26T07:05:14.109Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-06-26T07:05:34.163Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/refresh | Payload: {"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhc2hpZXIiLCJpYXQiOjE3ODI0NTc1MTQsImV4cCI6MTc4MzA2MjMxNH0.PGkMECUz56ZSA95SyZOZOsOiBr1-a-Ab0-5s9tF2C-c"}
+[2026-06-26T07:05:44.183Z] IP: ::ffff:127.0.0.1 | User: cashier | Action: POST /api/auth/logout | Payload: {}
+[2026-06-26T07:05:44.195Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {}
+[2026-06-26T08:44:00.689Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {"username":"cashier","password":"cashier123"}
+[2026-06-26T08:44:20.737Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/refresh | Payload: {"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhc2hpZXIiLCJpYXQiOjE3ODI0NjM0NDAsImV4cCI6MTc4MzA2ODI0MH0.mCZYuq37RbT_qfaCbe72mxJG6nK9fDH_a0gS2QdlS6s"}
+[2026-06-26T08:44:30.751Z] IP: ::ffff:127.0.0.1 | User: cashier | Action: POST /api/auth/logout | Payload: {}
+[2026-06-26T08:44:30.758Z] IP: ::ffff:127.0.0.1 | User: Anonymous | Action: POST /api/auth/login | Payload: {}

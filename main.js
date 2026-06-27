@@ -12,8 +12,7 @@ const seedDefaultUsers = require("./seeds/default-users");
 let mainWindow;
 
 async function startServer() {
-  const PORT = process.env.PORT || 5500;
-  const MONGOPATH = process.env.MONGOPATH || "mongodb://127.0.0.1:27017/emmarket_production";
+  let PORT = Number(process.env.PORT || 5500);
 
   try {
     const connectionManager = require('./services/connection-manager');
@@ -23,14 +22,29 @@ async function startServer() {
     await seedDefaultUsers();
     
     return new Promise((resolve) => {
-      expressApp.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-        resolve(`http://localhost:${PORT}`);
-      });
+      const tryListen = (port) => {
+        const server = expressApp.listen(port, () => {
+          console.log(`[STARTUP VERIFICATION] Express API listening on active port ${port}`);
+          process.env.PORT = port;
+          resolve(`http://localhost:${port}`);
+        });
+
+        server.on('error', (err) => {
+          if (err.code === 'EADDRINUSE') {
+            console.warn(`[PORT CONFLICT] Port ${port} occupied. Attempting fallback port ${port + 1}...`);
+            tryListen(port + 1);
+          } else {
+            console.error("[STARTUP ERROR] API listen failure:", err);
+            resolve(`http://localhost:${port}`); // Fallback
+          }
+        });
+      };
+
+      tryListen(PORT);
     });
   } catch (err) {
     console.error("Failed to start server", err);
-    throw err;
+    return `http://localhost:${PORT}`;
   }
 }
 

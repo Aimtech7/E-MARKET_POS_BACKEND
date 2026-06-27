@@ -117,6 +117,8 @@ app.use("/payments", paymentRoute);
 app.use("/api/payments", paymentRoute);
 app.use("/delivery-notes", deliveryNoteRoute);
 app.use("/quotations", quotationRoute);
+const authRoute = require("./routes/auth-route");
+app.use("/api/auth", authRoute);
 app.use("/grn", grnRoute);
 
 const path = require("path");
@@ -124,16 +126,9 @@ const clientBuildPath = path.join(__dirname, "client-build");
 app.use(express.static(clientBuildPath));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    dbState: mongoose.connection.readyState,
-    hasCloudUri: !!process.env.CLOUD_MONGOPATH,
-    cloudUriPrefix: process.env.CLOUD_MONGOPATH ? process.env.CLOUD_MONGOPATH.substring(0, 15) + "..." : null,
-    hasSecretEnv: require('fs').existsSync("/etc/secrets/.env"),
-    renderEnv: !!process.env.RENDER
-  });
-});
+const { health, version } = require("./controller/auth-controller");
+app.get("/api/health", health);
+app.get("/api/version", version);
 
 app.get("*", async (req, res) => {
   res.sendFile(path.join(clientBuildPath, "index.html"));

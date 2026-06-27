@@ -128,11 +128,10 @@ const mpesaWebhook = async (req, res) => {
 const verifyMpesaPayment = async (req, res) => {
   try {
     const { reference } = req.params;
-    const data = await mpesaService.queryStatus(reference);
+    const data = await mpesaService.queryStatusWithRetry(reference, 3, 2000);
     
-    // Status can be updated here if needed
-    if (data.ResultCode === "0") {
-      await markTransactionComplete(reference, data);
+    if (String(data.ResultCode) === "0") {
+      await markTransactionComplete(reference, data, data);
     } else {
       await Transaction.findOneAndUpdate(
         { externalReference: reference },
